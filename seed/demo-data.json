@@ -1,0 +1,728 @@
+{
+  "_meta": {
+    "project": "Warmline demo dataset",
+    "generated_by": "seed/generate.mjs",
+    "goal": "Break into SF dev tools",
+    "node_cap": 12,
+    "fanout_count": 12,
+    "provenance": "People trace to real LinkedIn connections + Luma guest lists (seed/_inputs/, gitignored). See seed/WORKLOG.md for line-level provenance and seed/SCHEMA.md for the confidence method.",
+    "claims": {
+      "real": "people, evidence strings, events + attendance, co-attendance bridges",
+      "model_generated": "co_attended_event confidence scores + live reranking",
+      "illustrative": "specific confidence values, drafted openers, angles, go-cold trigger",
+      "not_live": "burner Luma signup, auto-send, per-user learning over time"
+    },
+    "pii": "none — no emails / phones / DMs / logins; public fields only"
+  },
+  "flags": {
+    "include_judge_edges": true
+  },
+  "goals": [
+    {
+      "id": "goal_sf_devtools",
+      "text": "Break into SF dev tools",
+      "goal_vector": null
+    }
+  ],
+  "people": [
+    {
+      "id": "self",
+      "name": "Zach Speck",
+      "headline": "Breaking into SF dev tools",
+      "company": null,
+      "linkedin_url": null,
+      "x_handle": null,
+      "avatar_url": null,
+      "is_self": true,
+      "is_target": false,
+      "roles": [
+        "self"
+      ],
+      "source": "self"
+    },
+    {
+      "id": "han",
+      "name": "Han Wang",
+      "headline": "Co-Founder, Mintlify",
+      "company": "Mintlify",
+      "linkedin_url": "https://linkedin.com/in/handotdev",
+      "x_handle": "handotdev",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": false,
+      "roles": [
+        "gatekeeper"
+      ],
+      "source": "linkedin_connection"
+    },
+    {
+      "id": "justin",
+      "name": "Justin Torre",
+      "headline": "Head of Enterprise, Mintlify",
+      "company": "Mintlify",
+      "linkedin_url": "https://linkedin.com/in/justintorre",
+      "x_handle": "justinstorre",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "gabriel",
+      "name": "Gabriel Petersson",
+      "headline": "Research (Sora), OpenAI",
+      "company": "OpenAI",
+      "linkedin_url": "https://linkedin.com/in/gabriel-petersson-ai",
+      "x_handle": "GabrielPeterss4",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "dylan",
+      "name": "Dylan Patel",
+      "headline": "Founder, SemiAnalysis",
+      "company": "SemiAnalysis",
+      "linkedin_url": "https://linkedin.com/in/dylanpatelsa",
+      "x_handle": "dylan522p",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "jeff",
+      "name": "Jeff Huber",
+      "headline": "Founder, Chroma",
+      "company": "Chroma",
+      "linkedin_url": "https://linkedin.com/in/jeffchuber",
+      "x_handle": "jeffreyhuber",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "albert",
+      "name": "Albert Gu",
+      "headline": "Co-Founder, Cartesia (Mamba)",
+      "company": "Cartesia",
+      "linkedin_url": "https://linkedin.com/in/albert-gu-8ab677139",
+      "x_handle": "_albertgu",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "ben",
+      "name": "Ben Tossell",
+      "headline": "Founder, Ben's Bites",
+      "company": "Ben's Bites",
+      "linkedin_url": null,
+      "x_handle": "bentossell",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "aiden",
+      "name": "Aiden Bai",
+      "headline": "Creator, React Scan / Million.js",
+      "company": "React Scan",
+      "linkedin_url": "https://linkedin.com/in/aidenbai",
+      "x_handle": "aidenybai",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "james",
+      "name": "James Grugett",
+      "headline": "Co-Founder, Manifold",
+      "company": "Manifold",
+      "linkedin_url": "https://linkedin.com/in/james-grugett",
+      "x_handle": "jahooma",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "cameron",
+      "name": "Cameron Pfiffer",
+      "headline": "Dev / Community, Letta",
+      "company": "Letta",
+      "linkedin_url": "https://linkedin.com/in/cameron-pfiffer",
+      "x_handle": "just_cameron",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "aron",
+      "name": "Aron Korenblit",
+      "headline": "Automation educator",
+      "company": "Independent",
+      "linkedin_url": "https://linkedin.com/in/aronkor",
+      "x_handle": "aronkor",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "jessy",
+      "name": "Jessy Lin",
+      "headline": "AI Researcher, UC Berkeley",
+      "company": "UC Berkeley",
+      "linkedin_url": "https://linkedin.com/in/jessylin",
+      "x_handle": "realJessyLin",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "evan",
+      "name": "Evan Bacon",
+      "headline": "Expo (React Native)",
+      "company": "Expo",
+      "linkedin_url": "https://linkedin.com/in/evanbacon",
+      "x_handle": "baconbrix",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "purav",
+      "name": "Purav Patel",
+      "headline": "Co-Founder, Clayzo",
+      "company": "Clayzo",
+      "linkedin_url": "https://linkedin.com/in/puravp05",
+      "x_handle": "patelpurav05",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": false,
+      "roles": [
+        "judge_bridge"
+      ],
+      "source": "linkedin_connection"
+    },
+    {
+      "id": "wayne",
+      "name": "Wayne Sutton",
+      "headline": "Convex (hackathon judge)",
+      "company": "Convex",
+      "linkedin_url": "https://linkedin.com/in/waynesutton",
+      "x_handle": "waynesutton",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": false,
+      "roles": [
+        "judge"
+      ],
+      "source": "luma_convex_hh"
+    },
+    {
+      "id": "danylo",
+      "name": "Danylo Borodchuk",
+      "headline": "Lopus (hackathon judge)",
+      "company": "Lopus",
+      "linkedin_url": "https://linkedin.com/in/danylo-borodchuk",
+      "x_handle": "danylo_dev",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": false,
+      "roles": [
+        "judge"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "cristina",
+      "name": "Cristina Cordova",
+      "headline": "COO, Linear",
+      "company": "Linear",
+      "linkedin_url": "https://linkedin.com/in/cristinajcordova",
+      "x_handle": null,
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": false,
+      "roles": [
+        "go_cold"
+      ],
+      "source": "linkedin_connection"
+    },
+    {
+      "id": "raouf",
+      "name": "Raouf Chebri",
+      "headline": "Developer Relations, Replit",
+      "company": "Replit",
+      "linkedin_url": "https://linkedin.com/in/raoufchebri",
+      "x_handle": null,
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": false,
+      "roles": [
+        "support"
+      ],
+      "source": "linkedin_connection"
+    },
+    {
+      "id": "pontus",
+      "name": "Pontus Abrahamsson",
+      "headline": "Principal Engineer, Ramp",
+      "company": "Ramp",
+      "linkedin_url": "https://linkedin.com/in/pontusabrahamsson",
+      "x_handle": null,
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": false,
+      "roles": [
+        "support"
+      ],
+      "source": "linkedin_connection"
+    },
+    {
+      "id": "greg",
+      "name": "Greg Feingold",
+      "headline": "Special Projects, Anthropic",
+      "company": "Anthropic",
+      "linkedin_url": "https://linkedin.com/in/greg-feingold-3a890a91",
+      "x_handle": null,
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": false,
+      "roles": [
+        "support"
+      ],
+      "source": "linkedin_connection"
+    },
+    {
+      "id": "kristiyan",
+      "name": "Kristiyan Velkov",
+      "headline": "Cursor Ambassador",
+      "company": "Cursor",
+      "linkedin_url": "https://linkedin.com/in/kristiyanvelkov",
+      "x_handle": null,
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": false,
+      "roles": [
+        "support"
+      ],
+      "source": "linkedin_connection"
+    },
+    {
+      "id": "allis",
+      "name": "Allis Yao",
+      "headline": "Member of Technical Staff, OpenAI",
+      "company": "OpenAI",
+      "linkedin_url": "https://linkedin.com/in/allisyao",
+      "x_handle": null,
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": false,
+      "roles": [
+        "support"
+      ],
+      "source": "linkedin_connection"
+    }
+  ],
+  "events": [
+    {
+      "id": "evt_mintlify_gala",
+      "name": "Mintlify Gala",
+      "date": "2026-04-16",
+      "attendee_ids": [
+        "han",
+        "justin",
+        "gabriel",
+        "dylan",
+        "jeff",
+        "albert",
+        "ben",
+        "aiden",
+        "james",
+        "cameron",
+        "aron",
+        "jessy",
+        "evan",
+        "danylo"
+      ]
+    },
+    {
+      "id": "evt_convex_happy_hour",
+      "name": "Convex and Friends Happy Hour @ Thee Parkside",
+      "date": "2026-06-18",
+      "attendee_ids": [
+        "purav",
+        "wayne"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from_id": "self",
+      "to_id": "han",
+      "type": "linkedin_1st",
+      "confidence": 0.95,
+      "evidence": "LinkedIn 1st-degree connection since 2025-08-16",
+      "confidence_tier": null,
+      "confidence_generated": false,
+      "judge_kicker": false,
+      "event_id": null
+    },
+    {
+      "from_id": "han",
+      "to_id": "justin",
+      "type": "co_attended_event",
+      "confidence": 0.92,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "High",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "self",
+      "to_id": "justin",
+      "type": "linkedin_1st",
+      "confidence": 0.95,
+      "evidence": "LinkedIn 1st-degree connection since 2025-01-23",
+      "confidence_tier": null,
+      "confidence_generated": false,
+      "judge_kicker": false,
+      "event_id": null
+    },
+    {
+      "from_id": "han",
+      "to_id": "gabriel",
+      "type": "co_attended_event",
+      "confidence": 0.76,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "High",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "self",
+      "to_id": "gabriel",
+      "type": "linkedin_1st",
+      "confidence": 0.95,
+      "evidence": "LinkedIn 1st-degree connection since 2024-12-05",
+      "confidence_tier": null,
+      "confidence_generated": false,
+      "judge_kicker": false,
+      "event_id": null
+    },
+    {
+      "from_id": "han",
+      "to_id": "dylan",
+      "type": "co_attended_event",
+      "confidence": 0.51,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "jeff",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "albert",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "ben",
+      "type": "co_attended_event",
+      "confidence": 0.51,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "aiden",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "james",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "cameron",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "aron",
+      "type": "co_attended_event",
+      "confidence": 0.51,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "jessy",
+      "type": "co_attended_event",
+      "confidence": 0.48,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "evan",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "self",
+      "to_id": "purav",
+      "type": "linkedin_1st",
+      "confidence": 0.95,
+      "evidence": "LinkedIn 1st-degree connection since 2026-06-23",
+      "confidence_tier": null,
+      "confidence_generated": false,
+      "judge_kicker": false,
+      "event_id": null
+    },
+    {
+      "from_id": "purav",
+      "to_id": "wayne",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Convex and Friends Happy Hour @ Thee Parkside, 2026-06-18",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": true,
+      "event_id": "evt_convex_happy_hour"
+    },
+    {
+      "from_id": "han",
+      "to_id": "danylo",
+      "type": "co_attended_event",
+      "confidence": 0.48,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": true,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "self",
+      "to_id": "cristina",
+      "type": "linkedin_1st",
+      "confidence": 0.95,
+      "evidence": "LinkedIn 1st-degree connection since 2021-02-21",
+      "confidence_tier": null,
+      "confidence_generated": false,
+      "judge_kicker": false,
+      "event_id": null
+    },
+    {
+      "from_id": "self",
+      "to_id": "raouf",
+      "type": "linkedin_1st",
+      "confidence": 0.95,
+      "evidence": "LinkedIn 1st-degree connection since 2024-10-14",
+      "confidence_tier": null,
+      "confidence_generated": false,
+      "judge_kicker": false,
+      "event_id": null
+    },
+    {
+      "from_id": "self",
+      "to_id": "pontus",
+      "type": "linkedin_1st",
+      "confidence": 0.95,
+      "evidence": "LinkedIn 1st-degree connection since 2025-04-10",
+      "confidence_tier": null,
+      "confidence_generated": false,
+      "judge_kicker": false,
+      "event_id": null
+    },
+    {
+      "from_id": "self",
+      "to_id": "greg",
+      "type": "linkedin_1st",
+      "confidence": 0.95,
+      "evidence": "LinkedIn 1st-degree connection since 2025-06-12",
+      "confidence_tier": null,
+      "confidence_generated": false,
+      "judge_kicker": false,
+      "event_id": null
+    },
+    {
+      "from_id": "self",
+      "to_id": "kristiyan",
+      "type": "linkedin_1st",
+      "confidence": 0.95,
+      "evidence": "LinkedIn 1st-degree connection since 2026-06-10",
+      "confidence_tier": null,
+      "confidence_generated": false,
+      "judge_kicker": false,
+      "event_id": null
+    },
+    {
+      "from_id": "self",
+      "to_id": "allis",
+      "type": "linkedin_1st",
+      "confidence": 0.95,
+      "evidence": "LinkedIn 1st-degree connection since 2025-07-10",
+      "confidence_tier": null,
+      "confidence_generated": false,
+      "judge_kicker": false,
+      "event_id": null
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "rec_gatekeeper_han",
+      "type": "gatekeeper",
+      "person_id": "han",
+      "goal_id": "goal_sf_devtools",
+      "score": 0.95,
+      "reason_bullets": [
+        "Your 1st-degree LinkedIn connection since 2025-08-16 — a warm door, not a cold email.",
+        "Co-founder of Mintlify, an AI-docs dev-tools company squarely in your target space.",
+        "Stood in the room at the Mintlify Gala with 12 of your highest-value targets (Dylan Patel, Jeff Huber, Albert Gu, Aiden Bai, Cameron Pfiffer…).",
+        "One coffee with Han is a credible intro path to a whole SF dev-tools cohort — 1 gatekeeper, a room."
+      ],
+      "trigger": null,
+      "how": {
+        "channel": "Warm DM on X (@handotdev), then a 20-min coffee",
+        "angle": "Peer building in dev tools — lead with Mintlify's docs-for-AI work and the Gala crowd, ask for 2–3 specific intros, not a blanket favor.",
+        "drafted_opener": "Han — fellow dev-tools obsessive here, we connected on LinkedIn last year. Loved that you pulled the Mintlify Gala together; that's exactly the SF dev-tools room I'm trying to build into. Could I grab 20 min of coffee? I'd specifically love a warm intro to Jeff (Chroma) and Albert (Cartesia) if you think there's a fit."
+      },
+      "how_generated": true,
+      "unlocks_ids": [
+        "justin",
+        "gabriel",
+        "dylan",
+        "jeff",
+        "albert",
+        "ben",
+        "aiden",
+        "james",
+        "cameron",
+        "aron",
+        "jessy",
+        "evan"
+      ]
+    },
+    {
+      "id": "rec_go_cold_cristina",
+      "type": "go_cold",
+      "person_id": "cristina",
+      "goal_id": "goal_sf_devtools",
+      "score": 0.72,
+      "reason_bullets": [
+        "Real 1st-degree connection since 2021-02-21 — dormant 5+ years, worth reviving.",
+        "COO of Linear — a flagship SF dev-tools company and a direct line into that world.",
+        "Why now: surfaced because she's a high-value, goal-relevant tie you've let go cold (trigger below is illustrative — replace with a real public signal before filming)."
+      ],
+      "trigger": "Dormant strong tie re-surfaced: recent public activity in dev-tools leadership (model-generated placeholder)",
+      "how": {
+        "channel": "LinkedIn re-intro message",
+        "angle": "Reconnect warmly, acknowledge the gap, anchor on a shared dev-tools thread, no ask on the first touch.",
+        "drafted_opener": "Cristina — it's been far too long since we first connected. I've been going deep on SF dev tools lately and Linear keeps coming up as the bar everyone measures against. Would love to reconnect and hear how you're thinking about the space — no agenda, just genuinely want to catch up."
+      },
+      "how_generated": true,
+      "unlocks_ids": []
+    }
+  ]
+}
