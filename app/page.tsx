@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "@/convex/_generated/api";
@@ -31,6 +31,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
 import { WarmGraph } from "@/components/warm-graph";
 import { cn } from "@/lib/utils";
 
@@ -51,11 +52,16 @@ function xHref(handle?: string) {
 }
 
 export default function Home() {
+  const router = useRouter();
   const [desc, setDesc] = useState(true);
   const [expanded, setExpanded] = useState<Id<"persons"> | null>(null);
 
   const feed = useQuery(api.feed.list, { limit: 40 });
   const icp = useQuery(api.icp.latest, {});
+
+  useEffect(() => {
+    if (icp === null) router.replace("/onboarding");
+  }, [icp, router]);
   const vote = useMutation(api.feedback.vote);
 
   const rows = useMemo(() => {

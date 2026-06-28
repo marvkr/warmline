@@ -50,7 +50,7 @@ export default function SignIn() {
               formData.set("flow", flow);
               void signIn("password", formData)
                 .then(() => {
-                  router.push("/");
+                  router.push(flow === "signUp" ? "/onboarding" : "/");
                 })
                 .catch((error) => {
                   setError(error.message);
