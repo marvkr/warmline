@@ -120,7 +120,8 @@ test("recommendation path: lead appears with the recommendation's why/how", asyn
       kind: "lead",
       score: 88,
       whyBullets: [{ text: "Strong ICP fit", confidence: 0.9 }],
-      how: { channel: "LinkedIn", angle: "shared interest", opener: "Hey there" },
+      how: ["LinkedIn", "shared interest", "Hey there"],
+      opener: "Hey there",
       unlocksIds: [],
     });
     return { leadId };
@@ -131,5 +132,5 @@ test("recommendation path: lead appears with the recommendation's why/how", asyn
   expect(lead).toBeDefined();
   expect(lead!.score).toBe(88);
   expect(lead!.why[0]).toEqual({ text: "Strong ICP fit", confidence: "high" });
-  expect(lead!.how).toBe("LinkedIn: Hey there");
+  expect(lead!.how).toEqual(["LinkedIn", "shared interest", "Hey there"]);
 });

@@ -1,6 +1,34 @@
 import { internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
+export const clearRecs = internalMutation({
+  args: {},
+  returns: v.object({ deleted: v.number() }),
+  handler: async (ctx) => {
+    const recs = await ctx.db.query("recommendations").collect();
+    for (const r of recs) await ctx.db.delete(r._id);
+    return { deleted: recs.length };
+  },
+});
+
+// Rename a company across the graph (e.g. "Stealth" → "Stripe" for the demo).
+export const renameCompany = internalMutation({
+  args: { from: v.string(), to: v.string() },
+  returns: v.object({ updated: v.number() }),
+  handler: async (ctx, args) => {
+    let updated = 0;
+    const rows = await ctx.db
+      .query("persons")
+      .withIndex("by_company", (q) => q.eq("company", args.from))
+      .take(500);
+    for (const p of rows) {
+      await ctx.db.patch(p._id, { company: args.to });
+      updated++;
+    }
+    return { updated };
+  },
+});
+
 // Dev helper: mark a user's already-uploaded sources as connected, so the
 // Connectors page reflects the data that's already in the graph.
 export const markSourcesConnected = internalMutation({

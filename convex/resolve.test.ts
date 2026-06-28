@@ -46,7 +46,8 @@ test("mergePersons: moves edge/recommendation/attendance, fills fields, deletes 
       kind: "lead",
       score: 0.5,
       whyBullets: [],
-      how: { channel: "x", angle: "warm", opener: "hi" },
+      how: ["x", "warm"],
+      opener: "hi",
       unlocksIds: [],
     });
     const eventId = await ctx.db.insert("events", { name: "YC Demo Day" });

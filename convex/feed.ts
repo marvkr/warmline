@@ -32,7 +32,7 @@ const feedRow = v.object({
   unlocks: v.optional(v.number()),
   why: v.array(v.object({ text: v.string(), confidence })),
   mutuals: v.array(v.object({ name: v.string(), initials: v.string() })),
-  how: v.string(),
+  how: v.array(v.string()),
   opener: v.optional(v.string()),
 });
 
@@ -91,17 +91,16 @@ type Pre = {
   p: Doc<"persons">;
   score: number;
   why: WhyBullet[];
-  how: string;
+  how: string[];
   opener?: string;
 };
 
-// Short, consistent "how" line for the column (the full drafted opener lives on
-// the row's `opener` and shows in the expanded view).
-function heuristicHow(p: Doc<"persons">): string {
-  if (p.role === "connector") return "Connect — opens leads in your ICP";
-  return p.relationshipToYou === "connected"
-    ? "Reach out directly"
-    : "Ask a mutual for the intro";
+function heuristicHow(p: Doc<"persons">): string[] {
+  if (p.role === "connector")
+    return ["Connect with them to unlock leads in your ICP"];
+  if (p.relationshipToYou === "connected")
+    return ["Reach out directly via LinkedIn or email"];
+  return ["Ask a mutual connection for a warm intro"];
 }
 
 export const list = query({
@@ -131,8 +130,8 @@ export const list = query({
             text: w.text,
             confidence: confLabel(w.confidence),
           })),
-          how: (r.how as string[]).filter(Boolean).join(" · "),
-          opener: r.opener ?? "",
+          how: r.how.filter(Boolean),
+          opener: r.opener,
         });
       }
     } else {

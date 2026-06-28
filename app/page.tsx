@@ -245,9 +245,14 @@ function FeedRowView({
 
         {/* How */}
         <TableCell className="align-top">
-          <p className="text-[13px] leading-snug text-muted-foreground">
-            {row.how}
-          </p>
+          <ul className="space-y-1">
+            {row.how.map((b, i) => (
+              <li key={i} className="flex items-start gap-1.5 text-[13px] leading-snug text-muted-foreground">
+                <span className="mt-[3px] shrink-0 text-[9px] text-muted-foreground/50">●</span>
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
         </TableCell>
 
         {/* Mutuals */}
@@ -306,7 +311,7 @@ function FeedRowView({
             {row.opener ? (
               <div className="mb-3 rounded-lg border border-border bg-card p-3 [box-shadow:var(--shadow-s)]">
                 <div className="mb-1 text-xs font-medium text-muted-foreground">
-                  Drafted opener · {row.how}
+                  Drafted opener
                 </div>
                 <p className="text-sm text-foreground">{row.opener}</p>
               </div>
