@@ -1,234 +1,208 @@
 "use client";
 
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { api } from "../convex/_generated/api";
-import Link from "next/link";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { useMemo, useState } from "react";
+import { ArrowUpDown, Crown, Plus, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { AvatarGroup } from "@/components/ui/avatar-group";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { FEED, GOAL, type Confidence, type FeedRow } from "./feed-data";
+
+const DOT: Record<Confidence, string> = {
+  high: "bg-[oklch(0.82_0.11_165)]",
+  medium: "bg-[oklch(0.85_0.1_85)]",
+  low: "bg-[oklch(0.7_0.16_25)]",
+};
 
 export default function Home() {
+  const [desc, setDesc] = useState(true);
+  const [votes, setVotes] = useState<Record<string, "good" | "bad" | undefined>>({});
+
+  const rows = useMemo(
+    () => [...FEED].sort((a, b) => (desc ? b.score - a.score : a.score - b.score)),
+    [desc],
+  );
+
   return (
-    <>
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md p-4 border-b border-slate-200 dark:border-slate-700 flex flex-row justify-between items-center shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-3">
-            <Image src="/convex.svg" alt="Convex Logo" width={32} height={32} />
-            <div className="w-px h-8 bg-slate-300 dark:bg-slate-600"></div>
-            <Image
-              src="/nextjs-icon-light-background.svg"
-              alt="Next.js Logo"
-              width={32}
-              height={32}
-              className="dark:hidden"
-            />
-            <Image
-              src="/nextjs-icon-dark-background.svg"
-              alt="Next.js Logo"
-              width={32}
-              height={32}
-              className="hidden dark:block"
-            />
+    <main className="mx-auto max-w-6xl px-6 py-10">
+      <header className="mb-8">
+        <h1 className="text-xl font-semibold tracking-tight">Warmline</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Who to reach out to, why, and how.
+        </p>
+
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm [box-shadow:var(--shadow-s)]">
+            <span className="text-muted-foreground">Goal</span>
+            <span className="font-medium">{GOAL}</span>
+            <Button variant="ghost" size="sm" className="ml-1 h-7 px-2 text-xs">
+              Edit
+            </Button>
           </div>
-          <h1 className="font-semibold text-slate-800 dark:text-slate-200">
-            Convex + Next.js + Convex Auth
-          </h1>
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <Plus className="size-4" /> Find more
+          </Button>
         </div>
-        <SignOutButton />
       </header>
-      <main className="p-8 flex flex-col gap-8">
-        <Content />
-      </main>
-    </>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[28%]">Person</TableHead>
+            <TableHead className="w-[140px]">
+              <button
+                onClick={() => setDesc((d) => !d)}
+                className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+              >
+                Score <ArrowUpDown className="size-3.5" />
+              </button>
+            </TableHead>
+            <TableHead>Why</TableHead>
+            <TableHead className="w-[120px]">Mutuals</TableHead>
+            <TableHead className="w-[120px] text-right">Feedback</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row) => (
+            <FeedRowView
+              key={row.id}
+              row={row}
+              vote={votes[row.id]}
+              onVote={(v) =>
+                setVotes((prev) => ({
+                  ...prev,
+                  [row.id]: prev[row.id] === v ? undefined : v,
+                }))
+              }
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </main>
   );
 }
 
-function SignOutButton() {
-  const { isAuthenticated } = useConvexAuth();
-  const { signOut } = useAuthActions();
-  const router = useRouter();
-  return (
-    <>
-      {isAuthenticated && (
-        <button
-          className="bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
-          onClick={() =>
-            void signOut().then(() => {
-              router.push("/signin");
-            })
-          }
-        >
-          Sign out
-        </button>
-      )}
-    </>
-  );
-}
-
-function Content() {
-  const { viewer, numbers } =
-    useQuery(api.myFunctions.listNumbers, {
-      count: 10,
-    }) ?? {};
-  const addNumber = useMutation(api.myFunctions.addNumber);
-
-  if (viewer === undefined || numbers === undefined) {
-    return (
-      <div className="mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-          <div
-            className="w-2 h-2 bg-slate-500 rounded-full animate-bounce"
-            style={{ animationDelay: "0.1s" }}
-          ></div>
-          <div
-            className="w-2 h-2 bg-slate-600 rounded-full animate-bounce"
-            style={{ animationDelay: "0.2s" }}
-          ></div>
-          <p className="ml-2 text-slate-600 dark:text-slate-400">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-4 max-w-lg mx-auto">
-      <div>
-        <h2 className="font-bold text-xl text-slate-800 dark:text-slate-200">
-          Welcome {viewer ?? "Anonymous"}!
-        </h2>
-        <p className="text-slate-600 dark:text-slate-400 mt-2">
-          You are signed into a demo application using Convex Auth.
-        </p>
-        <p className="text-slate-600 dark:text-slate-400 mt-1">
-          This app can generate random numbers and store them in your Convex
-          database.
-        </p>
-      </div>
-
-      <div className="h-px bg-slate-200 dark:bg-slate-700"></div>
-
-      <div className="flex flex-col gap-4">
-        <h2 className="font-semibold text-xl text-slate-800 dark:text-slate-200">
-          Number generator
-        </h2>
-        <p className="text-slate-600 dark:text-slate-400 text-sm">
-          Click the button below to generate a new number. The data is persisted
-          in the Convex cloud database - open this page in another window and
-          see the data sync automatically!
-        </p>
-        <button
-          className="bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-sm font-medium px-6 py-3 rounded-lg cursor-pointer transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
-          onClick={() => {
-            void addNumber({ value: Math.floor(Math.random() * 10) });
-          }}
-        >
-          + Generate random number
-        </button>
-        <div className="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-4 shadow-sm">
-          <p className="font-semibold text-slate-800 dark:text-slate-200 mb-2">
-            Newest Numbers
-          </p>
-          <p className="text-slate-700 dark:text-slate-300 font-mono text-lg">
-            {numbers?.length === 0
-              ? "Click the button to generate a number!"
-              : (numbers?.join(", ") ?? "...")}
-          </p>
-        </div>
-      </div>
-
-      <div className="h-px bg-slate-200 dark:bg-slate-700"></div>
-
-      <div className="flex flex-col gap-4">
-        <h2 className="font-semibold text-xl text-slate-800 dark:text-slate-200">
-          Making changes
-        </h2>
-        <p className="text-slate-600 dark:text-slate-400 text-sm">
-          Edit{" "}
-          <code className="text-sm font-semibold font-mono bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600">
-            convex/myFunctions.ts
-          </code>{" "}
-          to change the backend.
-        </p>
-        <p className="text-slate-600 dark:text-slate-400 text-sm">
-          Edit{" "}
-          <code className="text-sm font-semibold font-mono bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600">
-            app/page.tsx
-          </code>{" "}
-          to change the frontend.
-        </p>
-        <p className="text-slate-600 dark:text-slate-400 text-sm">
-          See the{" "}
-          <Link
-            href="/server"
-            className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 font-medium underline decoration-2 underline-offset-2 transition-colors"
-          >
-            /server route
-          </Link>{" "}
-          for an example of loading data in a server component
-        </p>
-      </div>
-
-      <div className="h-px bg-slate-200 dark:bg-slate-700"></div>
-
-      <div className="flex flex-col gap-4">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
-          Useful resources
-        </h2>
-        <div className="flex gap-4">
-          <div className="flex flex-col gap-4 w-1/2">
-            <ResourceCard
-              title="Convex docs"
-              description="Read comprehensive documentation for all Convex features."
-              href="https://docs.convex.dev/home"
-            />
-            <ResourceCard
-              title="Stack articles"
-              description="Learn about best practices, use cases, and more from a growing
-            collection of articles, videos, and walkthroughs."
-              href="https://stack.convex.dev"
-            />
-          </div>
-          <div className="flex flex-col gap-4 w-1/2">
-            <ResourceCard
-              title="Templates"
-              description="Browse our collection of templates to get started quickly."
-              href="https://www.convex.dev/templates"
-            />
-            <ResourceCard
-              title="Discord"
-              description="Join our developer community to ask questions, trade tips & tricks,
-            and show off your projects."
-              href="https://www.convex.dev/community"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ResourceCard({
-  title,
-  description,
-  href,
+function FeedRowView({
+  row,
+  vote,
+  onVote,
 }: {
-  title: string;
-  description: string;
-  href: string;
+  row: FeedRow;
+  vote: "good" | "bad" | undefined;
+  onVote: (v: "good" | "bad") => void;
 }) {
   return (
-    <a
-      href={href}
-      className="flex flex-col gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 p-5 rounded-xl h-36 overflow-auto border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] group cursor-pointer"
-      target="_blank"
-    >
-      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100 transition-colors">
-        {title} →
-      </h3>
-      <p className="text-xs text-slate-600 dark:text-slate-400">
-        {description}
-      </p>
-    </a>
+    <TableRow>
+      {/* Person */}
+      <TableCell className="align-top">
+        <div className="flex items-start gap-3">
+          <Avatar className="mt-0.5">
+            <AvatarFallback>{row.initials}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{row.name}</span>
+              <span
+                className="grid size-4 shrink-0 place-items-center rounded-[3px] bg-[#0a66c2] text-[9px] font-bold leading-none text-white"
+                aria-label="LinkedIn profile"
+              >
+                in
+              </span>
+            </div>
+            <div className="truncate text-xs text-muted-foreground">
+              {row.company} · {row.role}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {row.kind === "lead" ? (
+                <Badge variant="secondary">Lead</Badge>
+              ) : (
+                <Badge variant="primary">Warm intro</Badge>
+              )}
+              {row.gatekeeper && (
+                <Badge variant="warning" className="gap-1">
+                  <Crown className="size-3" /> Gatekeeper
+                </Badge>
+              )}
+              {row.unlocks ? <Badge variant="outline">unlocks {row.unlocks}</Badge> : null}
+            </div>
+          </div>
+        </div>
+      </TableCell>
+
+      {/* Score */}
+      <TableCell className="align-top">
+        <div className="text-2xl font-semibold tabular-nums">{row.score}</div>
+        <div className="mt-2 flex items-center gap-2">
+          <Progress value={row.tieStrength} className="h-1.5 w-16" />
+          <span className="text-[11px] text-muted-foreground">tie {row.tieStrength}</span>
+        </div>
+      </TableCell>
+
+      {/* Why */}
+      <TableCell className="align-top">
+        <ul className="space-y-1.5">
+          {row.why.map((b, i) => (
+            <li key={i} className="flex items-start gap-2 text-xs">
+              <span
+                className={cn("mt-1 size-1.5 shrink-0 rounded-full", DOT[b.confidence])}
+                aria-label={`${b.confidence} confidence`}
+              />
+              <span className="text-secondary-foreground">{b.text}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2.5 text-xs text-muted-foreground">
+          <span className="font-medium text-foreground">How:</span> {row.how}
+        </p>
+      </TableCell>
+
+      {/* Mutuals */}
+      <TableCell className="align-top">
+        <AvatarGroup max={3}>
+          {row.mutuals.map((m) => (
+            <Avatar key={m.name} className="ring-2 ring-background">
+              <AvatarFallback className="text-[10px]">{m.initials}</AvatarFallback>
+            </Avatar>
+          ))}
+        </AvatarGroup>
+        <Button variant="link" size="sm" className="mt-1 h-auto px-0 text-xs">
+          Ask your network
+        </Button>
+      </TableCell>
+
+      {/* Feedback */}
+      <TableCell className="align-top text-right">
+        <div className="inline-flex gap-1">
+          <Button
+            variant={vote === "good" ? "primary" : "ghost"}
+            size="icon"
+            className="size-8"
+            aria-label="Good, more like this"
+            onClick={() => onVote("good")}
+          >
+            <ThumbsUp className="size-4" />
+          </Button>
+          <Button
+            variant={vote === "bad" ? "destructive" : "ghost"}
+            size="icon"
+            className="size-8"
+            aria-label="Bad, fewer like this"
+            onClick={() => onVote("bad")}
+          >
+            <ThumbsDown className="size-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
   );
 }

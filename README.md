@@ -1,46 +1,54 @@
-# warmline
+# Warmline
 
-A [Convex](https://convex.dev/) + Next.js + Convex Auth app.
+**The For You feed for your warm network.**
 
-After the initial setup (<2 minutes) you'll have a working full-stack app using:
+Everyone is automating *cold* outreach — more personalized spam, sent faster. It's a race to the bottom. Warmline plays the other game: the highest-converting lead you'll ever get is a **warm intro**, and the one you need is usually sitting **one person away** — invisible, because it's scattered across your Gmail, a cofounder's LinkedIn, and an event you both almost went to.
 
-- Convex as your backend (database, server logic)
-- [React](https://react.dev/) as your frontend (web page interactivity)
-- [Next.js](https://nextjs.org/) for optimized web hosting and page routing
-- [Tailwind](https://tailwindcss.com/) for building great looking accessible UI
-- [Convex Auth](https://labs.convex.dev/auth) for authentication
+Tell Warmline your goal once. A proactive agent watches the connections you already have, surfaces the intro you didn't know existed, and tells you exactly **how** to make it land — channel, angle, and a drafted opener.
+
+> Cold is a volume game everyone's racing to the bottom on. Warm is a knowledge game nobody's playing. We don't help you send more — we show you the door that was already open.
+
+Built for the **YC AI Growth Hackathon** (24-hour build).
+
+## What makes it different (not just another network search)
+
+- **Proactive, not reactive** — it *pushes* the intro you didn't ask for, instead of waiting for you to search.
+- **2nd / 3rd degree, not just mutuals** — finds the *gatekeeper* to befriend who unlocks many targets at once.
+- **Serendipity layer** — fuses event RSVPs + live social signal into an attendance-confidence score ("will they actually be there?").
+- **Per-person tailored ranking** — a For You feed pointed at people; thumbs-up / thumbs-down visibly reorders the list.
+
+## How it works
+
+- **Warm signal** — your own Google contacts / calendar (and Gmail) for genuine 1st-degree connections.
+- **Reach & enrichment** — [Fiber](https://fiber.ai/) for live LinkedIn / X data, people & company search, and contact details across 2nd/3rd degree.
+- **Proactive agent** — a Convex cron runs on a schedule, ranks leads against your stated goal, and traces the warm path.
+- **Live network graph** — the hero view: on a query like "warm intro at Stripe?", the path lights up node-by-node (you → gatekeeper → target).
+- **Why + How** — every lead ships with the reasoning and a drafted opener. Draft only — never auto-sent.
+- **CSV export** — every CRM imports one, so one file replaces ten fragile integrations.
+
+## Tech stack
+
+- [Convex](https://convex.dev/) — backend, realtime, and cron / scheduled functions
+- [Fiber](https://fiber.ai/) — live people / company data and signals
+- [OpenAI](https://openai.com/) — LLM reasoning + embeddings for ranking
+- [Next.js](https://nextjs.org/) + [React](https://react.dev/) — frontend
+- [Tailwind](https://tailwindcss.com/) — UI
+- [Convex Auth](https://labs.convex.dev/auth) — authentication
 
 ## Get started
 
-If you just cloned this codebase and didn't use `npm create convex`, run:
-
-```
+```bash
 npm install
 npm run dev
 ```
 
-If you're reading this README on GitHub and want to use this template, run:
+Set the required keys in your environment (see `.env.example`):
 
-```
-npm create convex@latest -- -t nextjs-convexauth
-```
+- `FIBER_API_KEY` — get one at <https://fiber.ai/app/api>
+- `OPENAI_API_KEY`
+- Google OAuth credentials for warm-signal access
 
 ## Learn more
 
-To learn more about developing your project with Convex, check out:
-
-- The [Tour of Convex](https://docs.convex.dev/get-started) for a thorough introduction to Convex principles.
-- The rest of [Convex docs](https://docs.convex.dev/) to learn about all Convex features.
-- [Stack](https://stack.convex.dev/) for in-depth articles on advanced topics.
-- [Convex Auth docs](https://labs.convex.dev/auth) for documentation on the Convex Auth library.
-
-## Configuring other authentication methods
-
-To configure different authentication methods, see [Configuration](https://labs.convex.dev/auth/config) in the Convex Auth docs.
-
-## Join the community
-
-Join thousands of developers building full-stack apps with Convex:
-
-- Join the [Convex Discord community](https://convex.dev/community) to get help in real-time.
-- Follow [Convex on GitHub](https://github.com/get-convex/), star and contribute to the open-source implementation of Convex.
+- [Convex docs](https://docs.convex.dev/) · [Convex Auth](https://labs.convex.dev/auth)
+- [Fiber API docs](https://api.fiber.ai/docs/) — start at [`llms.txt`](https://api.fiber.ai/llms.txt)

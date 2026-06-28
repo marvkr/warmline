@@ -1,8 +1,49 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: oklch(0.16 0.008 285);
+  --foreground: oklch(0.95 0.006 80);
+  --card: oklch(0.205 0.011 285);
+  --card-foreground: oklch(0.95 0.006 80);
+  --popover: oklch(0.235 0.012 285);
+  --popover-foreground: oklch(0.95 0.006 80);
+  --primary: oklch(0.905 0.035 90);
+  --primary-foreground: oklch(0.2 0.012 285);
+  --secondary: oklch(0.26 0.012 285);
+  --secondary-foreground: oklch(0.88 0.01 285);
+  --muted: oklch(0.23 0.01 285);
+  --muted-foreground: oklch(0.64 0.014 285);
+  --accent: oklch(0.29 0.014 285);
+  --accent-foreground: oklch(0.96 0.006 80);
+  --destructive: oklch(0.6 0.19 25);
+  --destructive-foreground: oklch(0.98 0.008 20);
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(0.135 0.008 285);
+  --ring: oklch(0.86 0.05 90);
+  --radius: 0.625rem;
+  --velour: linear-gradient( to bottom, oklch(0.235 0.013 285), oklch(0.185 0.01 285) );
+  --velour-raised: linear-gradient( to bottom, oklch(0.305 0.014 286), oklch(0.245 0.012 286) );
+  --velour-hover: linear-gradient( to bottom, oklch(0.335 0.015 286), oklch(0.27 0.013 286) );
+  --champagne: linear-gradient( to bottom, oklch(0.95 0.03 95), oklch(0.875 0.045 88) );
+  --champagne-hover: linear-gradient( to bottom, oklch(0.97 0.028 95), oklch(0.9 0.043 88) );
+  --shadow-s: inset 0 1px 0 oklch(1 0 0 / 0.07), 0 1px 2px oklch(0 0 0 / 0.45), 0 2px 8px oklch(0 0 0 / 0.3);
+  --shadow-m: inset 0 1px 0 oklch(1 0 0 / 0.09), 0 2px 6px oklch(0 0 0 / 0.5), 0 10px 28px oklch(0 0 0 / 0.38);
+  --shadow-l: inset 0 1px 0 oklch(1 0 0 / 0.1), 0 0 0 1px oklch(1 0 0 / 0.05), 0 16px 48px oklch(0 0 0 / 0.55), 0 4px 12px oklch(0 0 0 / 0.4);
+  --shadow-xl: inset 0 1px 0 oklch(1 0 0 / 0.12), 0 0 0 1px oklch(1 0 0 / 0.06), 0 32px 80px oklch(0 0 0 / 0.65), 0 8px 24px oklch(0 0 0 / 0.45);
+  --shadow-inset: inset 0 1px 3px oklch(0 0 0 / 0.5), inset 0 -1px 0 oklch(1 0 0 / 0.04);
+  --shadow-button: inset 0 1px 0 oklch(1 0 0 / 0.09), inset 0 -1px 1px oklch(0 0 0 / 0.35), 0 1px 2px oklch(0 0 0 / 0.5), 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-button-hover: inset 0 1px 0 oklch(1 0 0 / 0.12), inset 0 -1px 1px oklch(0 0 0 / 0.35), 0 2px 4px oklch(0 0 0 / 0.5), 0 8px 22px oklch(0 0 0 / 0.4);
+  --shadow-primary: inset 0 1px 0 oklch(1 0 0 / 0.85), inset 0 -2px 4px oklch(0.75 0.06 85 / 0.55), 0 1px 2px oklch(0 0 0 / 0.5), 0 6px 18px oklch(0 0 0 / 0.45);
+  --chart-1: var(--primary);
+  --chart-2: oklch(from var(--primary) calc(l - 0.09) calc(c * 0.92) h);
+  --chart-3: oklch(from var(--primary) calc(l - 0.18) calc(c * 0.84) h);
+  --chart-4: oklch(from var(--primary) calc(l - 0.27) calc(c * 0.76) h);
+  --chart-5: oklch(from var(--primary) calc(l - 0.36) calc(c * 0.68) h);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 @theme inline {
@@ -10,6 +51,49 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --chart-1: var(--chart-1);
+  --shadow-primary: var(--shadow-primary);
+  --shadow-button-hover: var(--shadow-button-hover);
+  --shadow-button: var(--shadow-button);
+  --shadow-inset: var(--shadow-inset);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-l: var(--shadow-l);
+  --shadow-m: var(--shadow-m);
+  --shadow-s: var(--shadow-s);
+  --champagne-hover: var(--champagne-hover);
+  --champagne: var(--champagne);
+  --velour-hover: var(--velour-hover);
+  --velour-raised: var(--velour-raised);
+  --velour: var(--velour);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,3 +108,49 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.dark {
+  --background: oklch(0.16 0.008 285);
+  --foreground: oklch(0.95 0.006 80);
+  --card: oklch(0.205 0.011 285);
+  --card-foreground: oklch(0.95 0.006 80);
+  --popover: oklch(0.235 0.012 285);
+  --popover-foreground: oklch(0.95 0.006 80);
+  --primary: oklch(0.905 0.035 90);
+  --primary-foreground: oklch(0.2 0.012 285);
+  --secondary: oklch(0.26 0.012 285);
+  --secondary-foreground: oklch(0.88 0.01 285);
+  --muted: oklch(0.23 0.01 285);
+  --muted-foreground: oklch(0.64 0.014 285);
+  --accent: oklch(0.29 0.014 285);
+  --accent-foreground: oklch(0.96 0.006 80);
+  --destructive: oklch(0.6 0.19 25);
+  --destructive-foreground: oklch(0.98 0.008 20);
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(0.135 0.008 285);
+  --ring: oklch(0.86 0.05 90);
+  --radius: 0.625rem;
+  --velour: linear-gradient( to bottom, oklch(0.235 0.013 285), oklch(0.185 0.01 285) );
+  --velour-raised: linear-gradient( to bottom, oklch(0.305 0.014 286), oklch(0.245 0.012 286) );
+  --velour-hover: linear-gradient( to bottom, oklch(0.335 0.015 286), oklch(0.27 0.013 286) );
+  --champagne: linear-gradient( to bottom, oklch(0.95 0.03 95), oklch(0.875 0.045 88) );
+  --champagne-hover: linear-gradient( to bottom, oklch(0.97 0.028 95), oklch(0.9 0.043 88) );
+  --shadow-s: inset 0 1px 0 oklch(1 0 0 / 0.07), 0 1px 2px oklch(0 0 0 / 0.45), 0 2px 8px oklch(0 0 0 / 0.3);
+  --shadow-m: inset 0 1px 0 oklch(1 0 0 / 0.09), 0 2px 6px oklch(0 0 0 / 0.5), 0 10px 28px oklch(0 0 0 / 0.38);
+  --shadow-l: inset 0 1px 0 oklch(1 0 0 / 0.1), 0 0 0 1px oklch(1 0 0 / 0.05), 0 16px 48px oklch(0 0 0 / 0.55), 0 4px 12px oklch(0 0 0 / 0.4);
+  --shadow-xl: inset 0 1px 0 oklch(1 0 0 / 0.12), 0 0 0 1px oklch(1 0 0 / 0.06), 0 32px 80px oklch(0 0 0 / 0.65), 0 8px 24px oklch(0 0 0 / 0.45);
+  --shadow-inset: inset 0 1px 3px oklch(0 0 0 / 0.5), inset 0 -1px 0 oklch(1 0 0 / 0.04);
+  --shadow-button: inset 0 1px 0 oklch(1 0 0 / 0.09), inset 0 -1px 1px oklch(0 0 0 / 0.35), 0 1px 2px oklch(0 0 0 / 0.5), 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-button-hover: inset 0 1px 0 oklch(1 0 0 / 0.12), inset 0 -1px 1px oklch(0 0 0 / 0.35), 0 2px 4px oklch(0 0 0 / 0.5), 0 8px 22px oklch(0 0 0 / 0.4);
+  --shadow-primary: inset 0 1px 0 oklch(1 0 0 / 0.85), inset 0 -2px 4px oklch(0.75 0.06 85 / 0.55), 0 1px 2px oklch(0 0 0 / 0.5), 0 6px 18px oklch(0 0 0 / 0.45);
+  --chart-1: var(--primary);
+  --chart-2: oklch(from var(--primary) calc(l - 0.09) calc(c * 0.92) h);
+  --chart-3: oklch(from var(--primary) calc(l - 0.18) calc(c * 0.84) h);
+  --chart-4: oklch(from var(--primary) calc(l - 0.27) calc(c * 0.76) h);
+  --chart-5: oklch(from var(--primary) calc(l - 0.36) calc(c * 0.68) h);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base;
