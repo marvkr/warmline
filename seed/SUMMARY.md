@@ -33,7 +33,8 @@ Explainable, deterministic, **never randomized** (verified by independent re-der
 capped 0.92, tier = High if ≥ 0.70. Yields High = Justin 0.92 (Mintlify colleague + your connection),
 Gabriel 0.76 (your connection); Medium = the broader Gala crowd at 0.55 / 0.51 / 0.48 by goal-relevance.
 Specific values + openers are flagged model-generated (`confidence_generated` / `how_generated` /
-`trigger_generated`) so nothing illustrative is sold as ground truth.
+`trigger_generated`) so nothing illustrative is sold as ground truth. **Per-face display shows the
+tier (High/Medium), not the decimal** — see Frontend wiring notes below.
 
 ## What's verified
 - ✅ Every hero/judge/go-cold person traces to a real LinkedIn connection or Luma guest-list row
@@ -57,6 +58,20 @@ Specific values + openers are flagged model-generated (`confidence_generated` / 
    productionizes." Your call before filming.
 3. **Go-cold trigger is illustrative** (flagged `trigger_generated:true`). Optional: drop in a real
    recent Cristina/Linear public signal for Beat 5 before recording.
+
+## Frontend wiring notes (for Marvin)
+- **Per-face confidence badge: read `flags.show_confidence_as`, don't hardcode.** It's set to
+  `"tier"` — render each fan-out face with its `confidence_tier` (`High` / `Medium`) badge, NOT the
+  raw `confidence` decimal. (Several Medium faces share the same decimal by design; showing the number
+  per-face would read as templated and undercut the Beat-4 "real model" claim.) Keep using the numeric
+  `confidence` internally for **ranking + the Beat-4 live reorder** — it just shouldn't be shown on
+  each face. If we ever want raw scores back, flip the flag to `"score"`; the renderer should branch
+  on it, not assume.
+- **Fan-out reveal order = array order in `recommendations[gatekeeper].unlocks_ids`** (and the Han→
+  edge order): Han-only cold names lead (Dylan, Jeff, Albert …), your two direct connections
+  (Justin, Gabriel) land last as the "already one step in" kicker. Preserve this order on screen.
+- **Judge kicker: read `flags.include_judge_edges`.** When `false`, drop `role:"judge"` people and
+  `judge_kicker:true` edges; the 12-wide hero path stays intact (validated).
 
 ## To push (when you're ready)
 ```
