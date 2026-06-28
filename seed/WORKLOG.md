@@ -42,14 +42,30 @@ and non-uniform Mediums (0.48 / 0.51 / 0.55). Marked model-generated per Claims 
 
 ## Progress
 - [x] Resume protocol: STATUS absent, WORKLOG created → fresh run.
-- [x] Step 1: inspected `convex/` → no domain schema → "no schema yet" path chosen.
+- [x] Step 1: inspected `convex/` → no domain schema → "no schema yet" path chosen. Wrote `SCHEMA.md`.
 - [x] Data sourcing: extracted Connections.csv + Luma PDF; verified all hero/judge people are real.
-- [ ] Step 1: write `seed/SCHEMA.md` (the contract).
-- [ ] Step 2: write `seed/generate.mjs` → emit `seed/demo-data.json`; write `seed/load.mjs`.
-- [ ] Step 3: write + run `seed/validate.mjs` until green (auto-debug loop).
-- [ ] Step 4: spawn self-review subagent → `seed/REVIEW.md`; fix any FAIL.
+- [x] Step 2: wrote `generate.mjs` → emits `demo-data.json` (23 people / 24 edges / 2 events / 2 recs);
+      wrote `load.mjs` (dry-run Convex insert planner). Committed 45f5e7a.
+- [x] Step 3: wrote + ran `validate.mjs` — green. Hardened after review to 37 checks (Claims-Ledger
+      flag enforcement, strict determinism + tier, no-silent-skip, rendered-copy TODO guard).
+- [x] Step 4: spawned 3 independent reviewers (data/provenance PASS, PII+git-safety PASS, red-team).
+      Red-team's only BLOCK (Justin Torre = "Helicone not Mintlify") was REFUTED by web check:
+      **Mintlify acquired Helicone**, so Justin is correctly at Mintlify now — the export is current,
+      not stale. Applied red-team's valid should-fixes (#3 flag checks, #4 strict determinism,
+      #5 scrubbed builder TODO text out of the go-cold card). Re-validated green.
+- [ ] Step 4b: focused re-review to confirm fixes + no regression → write `seed/REVIEW.md`.
 - [ ] Step 5 (OVERRIDDEN): commit locally to zach/demo-data, STATUS=DONE, SUMMARY.md, STOP.
       **DO NOT PUSH** — Zach pushes in the morning after review (explicit override of PHASE_1 Step 5).
 
+## Open items for the morning (non-blocking — see SUMMARY.md)
+- Justin Torre title: export says "Head of Enterprise Solutions @ Mintlify"; some web aggregators say
+  "Engineering Manager". Kept the self-reported LinkedIn value. The Helicone→Mintlify acquisition is a
+  *strength* on camera (if a judge says "that's the Helicone guy" → "yes, Mintlify acquired Helicone").
+- Beat 4 script vs implemented score: storyboard names "social-post signal + LLM-as-judge"; the seed
+  score is a deterministic 4-term rule (co-attendance + direct-connection + same-employer + relevance).
+  Align the spoken line with what's computed, or frame the richer signals as the productionization path.
+- Go-cold trigger is illustrative (flagged `trigger_generated:true`); optionally swap in a real public
+  Cristina/Linear signal before filming Beat 5.
+
 ## Next up
-Write `seed/SCHEMA.md`, then `seed/generate.mjs`.
+Focused re-review → REVIEW.md → SUMMARY.md → STATUS=DONE → final local commit. (No push.)

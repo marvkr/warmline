@@ -243,11 +243,12 @@ const recommendations = [
       "One coffee with Han is a credible intro path to a whole SF dev-tools cohort — 1 gatekeeper, a room.",
     ],
     trigger: null,
+    trigger_generated: false,
     how: {
       channel: "Warm DM on X (@handotdev), then a 20-min coffee",
       angle: "Peer building in dev tools — lead with Mintlify's docs-for-AI work and the Gala crowd, ask for 2–3 specific intros, not a blanket favor.",
       drafted_opener:
-        "Han — fellow dev-tools obsessive here, we connected on LinkedIn last year. Loved that you pulled the Mintlify Gala together; that's exactly the SF dev-tools room I'm trying to build into. Could I grab 20 min of coffee? I'd specifically love a warm intro to Jeff (Chroma) and Albert (Cartesia) if you think there's a fit.",
+        "Han — fellow dev-tools obsessive here, we connected on LinkedIn last year. Loved the crowd at the Mintlify Gala — that's exactly the SF dev-tools room I'm trying to build into. Could I grab 20 min of coffee? I'd specifically love a warm intro to Jeff (Chroma) and Albert (Cartesia) if you think there's a fit.",
     },
     how_generated: true,
     unlocks_ids: fanoutIds,
@@ -261,9 +262,10 @@ const recommendations = [
     reason_bullets: [
       "Real 1st-degree connection since 2021-02-21 — dormant 5+ years, worth reviving.",
       "COO of Linear — a flagship SF dev-tools company and a direct line into that world.",
-      "Why now: surfaced because she's a high-value, goal-relevant tie you've let go cold (trigger below is illustrative — replace with a real public signal before filming).",
+      "Why now: a dormant but high-value, goal-relevant tie — Linear is the bar in the SF dev-tools world you're breaking into.",
     ],
-    trigger: "Dormant strong tie re-surfaced: recent public activity in dev-tools leadership (model-generated placeholder)",
+    trigger: "Dormant 5+ years — resurfaced as a high-relevance reconnect for your \"SF dev tools\" goal.",
+    trigger_generated: true,
     how: {
       channel: "LinkedIn re-intro message",
       angle: "Reconnect warmly, acknowledge the gap, anchor on a shared dev-tools thread, no ask on the first touch.",

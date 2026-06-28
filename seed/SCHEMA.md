@@ -25,7 +25,7 @@ The dataset is a single JSON document, `seed/demo-data.json`, with top-level key
 | `avatar_url` | string \| null | left `null` — backend/UI supplies avatars |
 | `is_self` | bool | the protagonist (consenting account). Exactly one `true`. |
 | `is_target` | bool | `true` for the 12 hero fan-out targets |
-| `roles` | string[] | tags: `gatekeeper` / `fanout` / `judge` / `go_cold` / `support` / `self` |
+| `roles` | string[] | tags: `gatekeeper` / `fanout` / `judge` / `judge_bridge` / `go_cold` / `support` / `self` |
 | `source` | string | provenance: `linkedin_connection` / `luma_gala` / `luma_convex_hh` |
 
 ### Edge  (`edges[]`)
@@ -59,6 +59,7 @@ The dataset is a single JSON document, `seed/demo-data.json`, with top-level key
 | `score` | number 0–1 | drives ranking |
 | `reason_bullets` | string[] | why-them / why-now |
 | `trigger` | string \| null | go-cold "why now" signal (model-generated; see Claims) |
+| `trigger_generated` | bool | `true` when `trigger` is model-generated/illustrative (go-cold); `false` otherwise |
 | `how` | object | `{ channel, angle, drafted_opener }` — `drafted_opener` is LLM-generated |
 | `how_generated` | bool | `true` (openers + angles are illustrative per §6) |
 | `unlocks_ids` | string[] | the gatekeeper fan-out this rec opens |

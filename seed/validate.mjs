@@ -108,27 +108,40 @@ const highs = fanoutEdges.filter((e) => e.confidence_tier === "High");
 const meds = fanoutEdges.filter((e) => e.confidence_tier === "Medium");
 assert(highs.length >= 1 && meds.length >= 1, "both High and Medium tiers present", `High=${highs.length} Med=${meds.length}`);
 
-// determinism: re-derive each fan-out score from its documented features and confirm it matches.
-// (rebuild the rule here independently; if generate.mjs ever drifts to randomness this breaks.)
+// determinism: re-derive EVERY co-attendance score (fan-out AND judge) from its documented features
+// and confirm BOTH value and tier match. Independent re-derivation of the rule in generate.mjs — any
+// drift to randomness, any target missing from the rule, or any mis-tier breaks this loudly. No
+// silent skips: a co-attendance target absent from REL is a FAILURE, not a pass.
 const RELEVANCE = { core: 0.1, adjacent: 0.06, broader: 0.03 };
 const REL = {
   justin: { rel: "core", mintlify: true, direct: true }, gabriel: { rel: "broader", direct: true },
   dylan: { rel: "adjacent" }, jeff: { rel: "core" }, albert: { rel: "core" }, ben: { rel: "adjacent" },
   aiden: { rel: "core" }, james: { rel: "core" }, cameron: { rel: "core" }, aron: { rel: "adjacent" },
-  jessy: { rel: "broader" }, evan: { rel: "core" },
+  jessy: { rel: "broader" }, evan: { rel: "core" }, wayne: { rel: "core" }, danylo: { rel: "broader" },
 };
+const allCoAttended = edges.filter((e) => e.type === "co_attended_event");
 let determinismOk = true;
-for (const e of fanoutEdges) {
+for (const e of allCoAttended) {
   const f = REL[e.to_id];
-  if (!f) continue;
+  if (!f) {
+    determinismOk = false;
+    fail("co-attendance target covered by the documented rule", `unknown target ${e.to_id} — score not reproducible`);
+    continue;
+  }
   let c = 0.45 + (f.direct ? 0.28 : 0) + (f.mintlify ? 0.25 : 0) + (RELEVANCE[f.rel] ?? 0);
   c = Math.min(0.92, Math.round(c * 100) / 100);
+  const tier = c >= 0.7 ? "High" : "Medium";
   if (Math.abs(c - e.confidence) > 1e-9) {
     determinismOk = false;
     fail("confidence matches documented formula", `${e.to_id}: got ${e.confidence}, formula ${c}`);
   }
+  if (e.confidence_tier !== tier) {
+    determinismOk = false;
+    fail("confidence_tier matches 0.70 threshold", `${e.to_id}: tier ${e.confidence_tier}, expected ${tier} (c=${c})`);
+  }
 }
-if (determinismOk) ok("every fan-out confidence reproduces the documented formula (deterministic)");
+if (determinismOk)
+  ok("every co-attendance confidence + tier reproduces the documented formula (deterministic, no silent skips)");
 
 // ---- judge toggle: dropping judge nodes/edges leaves hero path intact ------
 const judgePeople = new Set(people.filter((p) => (p.roles || []).includes("judge")).map((p) => p.id));
@@ -156,6 +169,32 @@ assert(!!gk, "gatekeeper recommendation (Han) exists", "missing");
 assert((gk?.unlocks_ids || []).length >= 12, "gatekeeper unlocks >=12 targets", `${gk?.unlocks_ids?.length}`);
 assert(!!gk?.how?.drafted_opener && /mintlify/i.test(gk.how.drafted_opener),
   "gatekeeper opener grounded in Han's real activity (mentions Mintlify)", "opener not grounded");
+
+// ---- Claims Ledger: every generated value must be flagged (no generated value sold as truth) ----
+let flagsOk = true;
+for (const e of edges) {
+  const want = e.type === "co_attended_event"; // model-generated reachability; linkedin_1st is not
+  if (e.confidence_generated !== want) {
+    flagsOk = false;
+    fail("edge confidence_generated flagged correctly", `${e.from_id}->${e.to_id}: ${e.confidence_generated} (want ${want})`);
+  }
+}
+for (const r of recommendations)
+  if (r.how_generated !== true) { flagsOk = false; fail("recommendation how_generated flagged", r.id); }
+if (goCold?.trigger && goCold.trigger_generated !== true) {
+  flagsOk = false; fail("go-cold trigger flagged generated", goCold.id);
+}
+if (flagsOk) ok("Claims Ledger flags set (generated confidence / openers / trigger all flagged)");
+
+// ---- No builder TODO/placeholder text in on-camera rendered recommendation copy ----------------
+const RENDER_TODO = /before filming|placeholder|TODO|FIXME|replace with a real|\(model-generated/i;
+let cleanCopy = true;
+for (const r of recommendations) {
+  const fields = [...(r.reason_bullets || []), r.trigger || "", r.how?.angle || "", r.how?.drafted_opener || ""];
+  for (const f of fields)
+    if (RENDER_TODO.test(f)) { cleanCopy = false; fail("no builder TODO text in rendered rec copy", `${r.id}: "${f.slice(0, 50)}"`); }
+}
+if (cleanCopy) ok("rendered recommendation copy is free of builder TODO/placeholder notes");
 
 // ---- provenance: hero-path people trace to a real source ------------------
 const heroIds = new Set([SELF, HAN, ...fanoutTargets, "purav", ...judgePeople, goCold?.person_id]);
