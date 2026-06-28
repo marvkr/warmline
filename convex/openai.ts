@@ -54,22 +54,25 @@ export async function deriveIcp(siteMarkdown: string): Promise<string> {
 
 export type Judgement = {
   why: { text: string; confidence: "high" | "medium" | "low" }[];
-  how: { channel: string; angle: string; opener: string };
+  how: string[]; // 3 concrete ways to connect
+  opener: string; // drafted opener
 };
 
-// LLM-as-judge: 3 why bullets (fit vs ICP) + how (channel/angle/drafted opener),
-// grounded in the provided facts. Draft only — never auto-sent.
+// LLM-as-judge: 3 why bullets (fit vs ICP) + 3 how bullets (concrete ways to
+// connect) + a drafted opener, grounded in the provided facts. Draft only.
 export async function judge(input: {
   icpText: string;
   person: { name: string; headline?: string; company?: string };
-  bridge?: string; // the connector + evidence, if any
+  connectors?: { name: string; evidence: string }[]; // mutuals who can warm-intro
   voice?: string; // the user's tone hint
 }): Promise<Judgement> {
   const sys =
-    "You are a growth-engineering assistant. Given an ICP and a person, output strict JSON " +
-    '{"why":[{"text","confidence"}],"how":{"channel","angle","opener"}}. ' +
-    "why = exactly 3 short bullets on why they fit the ICP, each confidence high|medium|low, grounded ONLY in the facts given. " +
-    "how = the outreach: channel, a one-line angle, and a 1-2 sentence drafted opener that references something real. " +
+    "You are a growth-engineering assistant. Given an ICP, a person, and any mutual connectors, output strict JSON " +
+    '{"why":[{"text","confidence"}],"how":["…","…","…"],"opener":"…"}. ' +
+    "why = exactly 3 short bullets on why they fit the ICP, each confidence high|medium|low, grounded ONLY in the facts. " +
+    "how = exactly 3 short, concrete bullets on HOW to connect with them — e.g. 'Ask <connector> for a warm intro (you both know them)', " +
+    "'Meet them at an event they attend', 'Open with their work on X', 'Engage with their recent posts first'. " +
+    "Use the named connectors when given. opener = a 1-2 sentence drafted message referencing something real. " +
     "Never invent facts. The opener is a draft, not sent.";
   const user = JSON.stringify(input);
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -96,6 +99,7 @@ export async function judge(input: {
   // defensive shape
   return {
     why: Array.isArray(parsed.why) ? parsed.why.slice(0, 3) : [],
-    how: parsed.how ?? { channel: "", angle: "", opener: "" },
+    how: Array.isArray(parsed.how) ? parsed.how.slice(0, 3) : [],
+    opener: typeof parsed.opener === "string" ? parsed.opener : "",
   };
 }
