@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# seed inputs (local-only: large exports + personal data)
+seed/_inputs/
