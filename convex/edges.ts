@@ -54,6 +54,7 @@ export const linkLeadEdges = internalMutation({
   handler: async (ctx, args) => {
     const lead = await ctx.db.get(args.leadId);
     if (!lead || !lead.company) return [];
+    if (/^stealth/i.test(lead.company)) return [];
     // Pull more than we need, since leads/self at the same company would otherwise
     // consume the cap before any connector is reached.
     const sameCompany = await ctx.db

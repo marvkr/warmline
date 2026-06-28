@@ -11,6 +11,20 @@ export const clearRecs = internalMutation({
   },
 });
 
+// Clear a company field across persons (set to undefined).
+export const clearCompany = internalMutation({
+  args: { company: v.string() },
+  returns: v.object({ cleared: v.number() }),
+  handler: async (ctx, args) => {
+    const rows = await ctx.db
+      .query("persons")
+      .withIndex("by_company", (q) => q.eq("company", args.company))
+      .take(500);
+    for (const p of rows) await ctx.db.patch(p._id, { company: undefined });
+    return { cleared: rows.length };
+  },
+});
+
 // Rename a company across the graph (e.g. "Stealth" → "Stripe" for the demo).
 export const renameCompany = internalMutation({
   args: { from: v.string(), to: v.string() },
