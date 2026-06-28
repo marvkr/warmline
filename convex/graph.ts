@@ -1,0 +1,141 @@
+import { query, QueryCtx } from "./_generated/server";
+import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
+import { introScore } from "./lib";
+
+// React-Flow-ready warm-path data for one person.
+//
+//  • LEAD      → paths-in:  You → top Connector(s) → Lead
+//  • CONNECTOR → fan-out:   You → Connector → [Leads they unlock]
+//
+// Connectors for a Lead are the best 1–3 mutuals by intro_score
+// (your tie strength × how well they know the Lead — see lib.introScore).
+// Consumed by components/warm-graph.tsx.
+
+const youValidator = v.object({
+  id: v.optional(v.id("persons")),
+  name: v.string(),
+});
+
+const nodeRef = v.object({
+  id: v.id("persons"),
+  name: v.string(),
+});
+
+const connectorRef = v.object({
+  id: v.id("persons"),
+  name: v.string(),
+  evidence: v.string(),
+  confidence: v.number(),
+});
+
+type You = { id?: Id<"persons">; name: string };
+
+// Best-effort lookup of "You" (the graph origin). Self is always created with
+// role "connector" (ingest.ingestSelf) and there is no isSelf index, so scan a
+// bounded slice of connectors. Falls back to a generic origin node.
+async function findYou(ctx: QueryCtx): Promise<You> {
+  const connectors = await ctx.db
+    .query("persons")
+    .withIndex("by_role", (q) => q.eq("role", "connector"))
+    .take(500);
+  const self = connectors.find((p) => p.isSelf);
+  return self ? { id: self._id, name: self.name } : { name: "You" };
+}
+
+export const pathForPerson = query({
+  args: { personId: v.id("persons") },
+  returns: v.union(
+    v.object({
+      kind: v.literal("lead"),
+      you: youValidator,
+      connectors: v.array(connectorRef),
+      target: nodeRef,
+    }),
+    v.object({
+      kind: v.literal("connector"),
+      you: youValidator,
+      connector: nodeRef,
+      unlocks: v.array(nodeRef),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const person = await ctx.db.get(args.personId);
+    if (!person) throw new Error("Person not found");
+    const you = await findYou(ctx);
+
+    if (person.role === "lead") {
+      // Top connectors bridging You → Lead, ranked by intro_score.
+      const edges = await ctx.db
+        .query("edges")
+        .withIndex("by_to", (q) => q.eq("to", person._id))
+        .take(50);
+      const scored: {
+        id: Id<"persons">;
+        name: string;
+        evidence: string;
+        confidence: number;
+        score: number;
+      }[] = [];
+      for (const e of edges) {
+        const c = await ctx.db.get(e.from);
+        if (!c) continue;
+        scored.push({
+          id: c._id,
+          name: c.name,
+          evidence: e.evidence,
+          confidence: e.confidence,
+          score: introScore(c.tieStrength, e.confidence),
+        });
+      }
+      scored.sort((a, b) => b.score - a.score);
+      // Dedup by connector, keeping the highest-scoring edge; take top 3.
+      const seen = new Set<Id<"persons">>();
+      const connectors: {
+        id: Id<"persons">;
+        name: string;
+        evidence: string;
+        confidence: number;
+      }[] = [];
+      for (const s of scored) {
+        if (seen.has(s.id)) continue;
+        seen.add(s.id);
+        connectors.push({
+          id: s.id,
+          name: s.name,
+          evidence: s.evidence,
+          confidence: s.confidence,
+        });
+        if (connectors.length === 3) break;
+      }
+      return {
+        kind: "lead" as const,
+        you,
+        connectors,
+        target: { id: person._id, name: person.name },
+      };
+    }
+
+    // Connector: fan-out to the Leads they unlock (up to 12 nodes).
+    const edges = await ctx.db
+      .query("edges")
+      .withIndex("by_from", (q) => q.eq("from", person._id))
+      .take(50);
+    const seen = new Set<Id<"persons">>();
+    const unlocks: { id: Id<"persons">; name: string }[] = [];
+    for (const e of edges) {
+      if (seen.has(e.to)) continue;
+      seen.add(e.to);
+      const lead = await ctx.db.get(e.to);
+      if (!lead || lead.role !== "lead") continue;
+      unlocks.push({ id: lead._id, name: lead.name });
+      if (unlocks.length === 12) break;
+    }
+    return {
+      kind: "connector" as const,
+      you,
+      connector: { id: person._id, name: person.name },
+      unlocks,
+    };
+  },
+});

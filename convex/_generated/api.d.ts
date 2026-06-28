@@ -9,8 +9,24 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as avatars from "../avatars.js";
+import type * as connectors from "../connectors.js";
+import type * as crons from "../crons.js";
+import type * as edges from "../edges.js";
+import type * as extension from "../extension.js";
+import type * as feed from "../feed.js";
+import type * as feedback from "../feedback.js";
+import type * as graph from "../graph.js";
 import type * as http from "../http.js";
+import type * as icp from "../icp.js";
+import type * as ingest from "../ingest.js";
+import type * as lib from "../lib.js";
+import type * as linkedinCsv from "../linkedinCsv.js";
+import type * as linkedinImport from "../linkedinImport.js";
 import type * as myFunctions from "../myFunctions.js";
+import type * as openai from "../openai.js";
+import type * as rank from "../rank.js";
+import type * as resolve from "../resolve.js";
 
 import type {
   ApiFromModules,
@@ -20,8 +36,24 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  avatars: typeof avatars;
+  connectors: typeof connectors;
+  crons: typeof crons;
+  edges: typeof edges;
+  extension: typeof extension;
+  feed: typeof feed;
+  feedback: typeof feedback;
+  graph: typeof graph;
   http: typeof http;
+  icp: typeof icp;
+  ingest: typeof ingest;
+  lib: typeof lib;
+  linkedinCsv: typeof linkedinCsv;
+  linkedinImport: typeof linkedinImport;
   myFunctions: typeof myFunctions;
+  openai: typeof openai;
+  rank: typeof rank;
+  resolve: typeof resolve;
 }>;
 
 /**

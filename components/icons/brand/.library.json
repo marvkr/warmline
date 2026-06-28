@@ -1,0 +1,15 @@
+{
+  "library": "logos",
+  "prefix": "logos",
+  "source": "iconify",
+  "note": "Outlook is from vscode-icons (file-type-outlook); not in the Logos set.",
+  "installedAt": "2026-06-28T19:58:00.000Z",
+  "icons": [
+    "chrome",
+    "google-icon",
+    "instagram-icon",
+    "linkedin-icon",
+    "vscode-icons:file-type-outlook",
+    "x"
+  ]
+}

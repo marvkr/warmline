@@ -1,8 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowUpDown, Crown, Plus, ThumbsDown, ThumbsUp } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useQuery, useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  KeyIcon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
+} from "@/components/icons";
+import { LinkedinIcon, XIcon } from "@/components/icons/brand";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AvatarGroup } from "@/components/ui/avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,8 +26,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { WarmGraph } from "@/components/warm-graph";
 import { cn } from "@/lib/utils";
-import { FEED, GOAL, type Confidence, type FeedRow } from "./feed-data";
+
+type Row = FunctionReturnType<typeof api.feed.list>[number];
+type Confidence = "high" | "medium" | "low";
 
 const DOT: Record<Confidence, string> = {
   high: "bg-[oklch(0.82_0.11_165)]",
@@ -24,185 +44,291 @@ const DOT: Record<Confidence, string> = {
   low: "bg-[oklch(0.7_0.16_25)]",
 };
 
+function linkedinHref(slug?: string) {
+  return slug ? `https://www.linkedin.com/in/${slug}` : undefined;
+}
+function xHref(handle?: string) {
+  return handle ? `https://x.com/${handle.replace(/^@/, "")}` : undefined;
+}
+
 export default function Home() {
   const [desc, setDesc] = useState(true);
-  const [votes, setVotes] = useState<Record<string, "good" | "bad" | undefined>>({});
+  const [expanded, setExpanded] = useState<Id<"persons"> | null>(null);
 
-  const rows = useMemo(
-    () => [...FEED].sort((a, b) => (desc ? b.score - a.score : a.score - b.score)),
-    [desc],
-  );
+  const feed = useQuery(api.feed.list, { limit: 40 });
+  const icp = useQuery(api.icp.latest, {});
+  const vote = useMutation(api.feedback.vote);
+
+  const rows = useMemo(() => {
+    const data = feed ?? [];
+    return [...data].sort((a, b) => (desc ? b.score - a.score : a.score - b.score));
+  }, [feed, desc]);
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
-      <header className="mb-8">
-        <h1 className="text-xl font-semibold tracking-tight">Warmline</h1>
+    <div className="max-w-[1500px] px-8 py-8">
+      <header className="mb-7">
+        <h1 className="text-xl font-semibold tracking-tight">
+          Who to reach out to
+        </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Who to reach out to, why, and how.
+          Ranked by how warm the path is and how well they fit your goal —
+          refreshed daily.
         </p>
-
-        <div className="mt-5 flex flex-wrap items-center gap-3">
-          <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm [box-shadow:var(--shadow-s)]">
-            <span className="text-muted-foreground">Goal</span>
-            <span className="font-medium">{GOAL}</span>
-            <Button variant="ghost" size="sm" className="ml-1 h-7 px-2 text-xs">
-              Edit
-            </Button>
-          </div>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Plus className="size-4" /> Find more
-          </Button>
-        </div>
       </header>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[28%]">Person</TableHead>
-            <TableHead className="w-[140px]">
-              <button
-                onClick={() => setDesc((d) => !d)}
-                className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
-              >
-                Score <ArrowUpDown className="size-3.5" />
-              </button>
-            </TableHead>
-            <TableHead>Why</TableHead>
-            <TableHead className="w-[120px]">Mutuals</TableHead>
-            <TableHead className="w-[120px] text-right">Feedback</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.map((row) => (
-            <FeedRowView
-              key={row.id}
-              row={row}
-              vote={votes[row.id]}
-              onVote={(v) =>
-                setVotes((prev) => ({
-                  ...prev,
-                  [row.id]: prev[row.id] === v ? undefined : v,
-                }))
-              }
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </main>
+      {feed === undefined ? (
+        <p className="py-16 text-center text-sm text-muted-foreground">
+          Loading your network…
+        </p>
+      ) : rows.length === 0 ? (
+        <p className="py-16 text-center text-sm text-muted-foreground">
+          No people yet — connect a source to load your network.
+        </p>
+      ) : (
+        <TooltipProvider delayDuration={150}>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[210px]">Person</TableHead>
+                <TableHead className="w-[118px]">
+                  <button
+                    onClick={() => setDesc((d) => !d)}
+                    className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+                  >
+                    Score{" "}
+                    {desc ? (
+                      <ChevronDownIcon className="size-3.5" />
+                    ) : (
+                      <ChevronUpIcon className="size-3.5" />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead className="min-w-[300px]">Why</TableHead>
+                <TableHead className="min-w-[240px]">How</TableHead>
+                <TableHead className="w-[100px]">Mutuals</TableHead>
+                <TableHead className="w-[88px] text-right">Feedback</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row) => (
+                <FeedRowView
+                  key={row.id}
+                  row={row}
+                  expanded={expanded === row.id}
+                  onToggle={() =>
+                    setExpanded((cur) => (cur === row.id ? null : row.id))
+                  }
+                  onVote={(v) => {
+                    if (icp) {
+                      void vote({
+                        icpId: icp._id,
+                        personId: row.id,
+                        vote: v === "good" ? "up" : "down",
+                      });
+                    }
+                  }}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </TooltipProvider>
+      )}
+    </div>
+  );
+}
+
+function GraphAccordion({ personId }: { personId: Id<"persons"> }) {
+  const data = useQuery(api.graph.pathForPerson, { personId });
+  if (data === undefined)
+    return (
+      <div className="flex h-[200px] items-center justify-center text-xs text-muted-foreground">
+        Tracing the warm path…
+      </div>
+    );
+  return <WarmGraph data={data} />;
+}
+
+function SocialLink({
+  href,
+  children,
+  label,
+}: {
+  href?: string;
+  children: React.ReactNode;
+  label: string;
+}) {
+  if (!href)
+    return (
+      <span className="text-muted-foreground/40" aria-hidden>
+        {children}
+      </span>
+    );
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      onClick={(e) => e.stopPropagation()}
+      className="text-muted-foreground transition-colors hover:text-foreground"
+    >
+      {children}
+    </a>
   );
 }
 
 function FeedRowView({
   row,
-  vote,
+  expanded,
+  onToggle,
   onVote,
 }: {
-  row: FeedRow;
-  vote: "good" | "bad" | undefined;
+  row: Row;
+  expanded: boolean;
+  onToggle: () => void;
   onVote: (v: "good" | "bad") => void;
 }) {
   return (
-    <TableRow>
-      {/* Person */}
-      <TableCell className="align-top">
-        <div className="flex items-start gap-3">
-          <Avatar className="mt-0.5">
-            <AvatarFallback>{row.initials}</AvatarFallback>
-          </Avatar>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{row.name}</span>
-              <span
-                className="grid size-4 shrink-0 place-items-center rounded-[3px] bg-[#0a66c2] text-[9px] font-bold leading-none text-white"
-                aria-label="LinkedIn profile"
-              >
-                in
-              </span>
-            </div>
-            <div className="truncate text-xs text-muted-foreground">
-              {row.company} · {row.role}
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              {row.kind === "lead" ? (
-                <Badge variant="secondary">Lead</Badge>
-              ) : (
-                <Badge variant="primary">Warm intro</Badge>
-              )}
-              {row.gatekeeper && (
-                <Badge variant="warning" className="gap-1">
-                  <Crown className="size-3" /> Gatekeeper
-                </Badge>
-              )}
-              {row.unlocks ? <Badge variant="outline">unlocks {row.unlocks}</Badge> : null}
+    <>
+      <TableRow className="cursor-pointer" onClick={onToggle}>
+        {/* Person */}
+        <TableCell className="align-top">
+          <div className="flex items-start gap-3">
+            <Avatar className="mt-0.5">
+              {row.avatarUrl ? <AvatarImage src={row.avatarUrl} alt="" /> : null}
+              <AvatarFallback>{row.initials}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="truncate font-medium">{row.name}</span>
+                <SocialLink
+                  href={linkedinHref(row.linkedinUrl)}
+                  label={`${row.name} on LinkedIn`}
+                >
+                  <LinkedinIcon role="img" className="size-3.5 shrink-0" />
+                </SocialLink>
+                <SocialLink
+                  href={xHref(row.xHandle)}
+                  label={`${row.name} on X`}
+                >
+                  <XIcon role="img" className="size-3 shrink-0" />
+                </SocialLink>
+              </div>
+              <div className="truncate text-xs text-muted-foreground">
+                {[row.company, row.role].filter(Boolean).join(" · ")}
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {row.kind === "lead" ? (
+                  <Badge variant="secondary">Lead</Badge>
+                ) : (
+                  <Badge variant="primary">Connector</Badge>
+                )}
+                {row.gatekeeper && (
+                  <Badge variant="warning" className="gap-1">
+                    <KeyIcon className="size-3" /> Key
+                  </Badge>
+                )}
+                {row.unlocks ? (
+                  <Badge variant="outline">unlocks {row.unlocks}</Badge>
+                ) : null}
+              </div>
             </div>
           </div>
-        </div>
-      </TableCell>
+        </TableCell>
 
-      {/* Score */}
-      <TableCell className="align-top">
-        <div className="text-2xl font-semibold tabular-nums">{row.score}</div>
-        <div className="mt-2 flex items-center gap-2">
-          <Progress value={row.tieStrength} className="h-1.5 w-16" />
-          <span className="text-[11px] text-muted-foreground">tie {row.tieStrength}</span>
-        </div>
-      </TableCell>
+        {/* Score */}
+        <TableCell className="align-top">
+          <div className="text-2xl font-semibold tabular-nums">{row.score}</div>
+          <div className="mt-2 flex items-center gap-2">
+            <Progress value={row.tieStrength} className="h-1.5 w-14" />
+            <span className="text-[11px] text-muted-foreground">
+              {row.tieStrength}
+            </span>
+          </div>
+        </TableCell>
 
-      {/* Why */}
-      <TableCell className="align-top">
-        <ul className="space-y-1.5">
-          {row.why.map((b, i) => (
-            <li key={i} className="flex items-start gap-2 text-xs">
-              <span
-                className={cn("mt-1 size-1.5 shrink-0 rounded-full", DOT[b.confidence])}
-                aria-label={`${b.confidence} confidence`}
-              />
-              <span className="text-secondary-foreground">{b.text}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-2.5 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">How:</span> {row.how}
-        </p>
-      </TableCell>
+        {/* Why */}
+        <TableCell className="align-top">
+          <ul className="space-y-1.5">
+            {row.why.map((b, i) => (
+              <li key={i} className="flex items-start gap-2 text-[13px] leading-snug">
+                <span
+                  className={cn(
+                    "mt-1.5 size-1.5 shrink-0 rounded-full",
+                    DOT[b.confidence],
+                  )}
+                  aria-label={`${b.confidence} confidence`}
+                />
+                <span className="text-secondary-foreground">{b.text}</span>
+              </li>
+            ))}
+          </ul>
+        </TableCell>
 
-      {/* Mutuals */}
-      <TableCell className="align-top">
-        <AvatarGroup max={3}>
-          {row.mutuals.map((m) => (
-            <Avatar key={m.name} className="ring-2 ring-background">
-              <AvatarFallback className="text-[10px]">{m.initials}</AvatarFallback>
-            </Avatar>
-          ))}
-        </AvatarGroup>
-        <Button variant="link" size="sm" className="mt-1 h-auto px-0 text-xs">
-          Ask your network
-        </Button>
-      </TableCell>
+        {/* How */}
+        <TableCell className="align-top">
+          <p className="text-[13px] leading-snug text-muted-foreground">
+            {row.how}
+          </p>
+        </TableCell>
 
-      {/* Feedback */}
-      <TableCell className="align-top text-right">
-        <div className="inline-flex gap-1">
-          <Button
-            variant={vote === "good" ? "primary" : "ghost"}
-            size="icon"
-            className="size-8"
-            aria-label="Good, more like this"
-            onClick={() => onVote("good")}
-          >
-            <ThumbsUp className="size-4" />
-          </Button>
-          <Button
-            variant={vote === "bad" ? "destructive" : "ghost"}
-            size="icon"
-            className="size-8"
-            aria-label="Bad, fewer like this"
-            onClick={() => onVote("bad")}
-          >
-            <ThumbsDown className="size-4" />
-          </Button>
-        </div>
-      </TableCell>
-    </TableRow>
+        {/* Mutuals */}
+        <TableCell className="align-top">
+          {row.mutuals.length > 0 ? (
+            <AvatarGroup max={3}>
+              {row.mutuals.map((m) => (
+                <Tooltip key={m.name}>
+                  <TooltipTrigger asChild>
+                    <Avatar className="ring-2 ring-background">
+                      <AvatarFallback className="text-[10px]">
+                        {m.initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </TooltipTrigger>
+                  <TooltipContent>{m.name}</TooltipContent>
+                </Tooltip>
+              ))}
+            </AvatarGroup>
+          ) : (
+            <span className="text-xs text-muted-foreground">—</span>
+          )}
+        </TableCell>
+
+        {/* Feedback */}
+        <TableCell
+          className="align-top text-right"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="inline-flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              aria-label="Good, more like this"
+              onClick={() => onVote("good")}
+            >
+              <ThumbsUpIcon className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              aria-label="Bad, fewer like this"
+              onClick={() => onVote("bad")}
+            >
+              <ThumbsDownIcon className="size-4" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+
+      {expanded && (
+        <TableRow>
+          <TableCell colSpan={6} className="bg-muted/10 p-3">
+            <GraphAccordion personId={row.id} />
+          </TableCell>
+        </TableRow>
+      )}
+    </>
   );
 }

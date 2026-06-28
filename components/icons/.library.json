@@ -1,0 +1,26 @@
+{
+  "library": "feather",
+  "prefix": "feather",
+  "source": "iconify",
+  "installedAt": "2026-06-28T19:40:35.478Z",
+  "icons": [
+    "calendar",
+    "check",
+    "chevron-down",
+    "chevron-up",
+    "clock",
+    "download",
+    "external-link",
+    "file-text",
+    "info",
+    "key",
+    "plus",
+    "shield",
+    "thumbs-down",
+    "thumbs-up",
+    "trash-2",
+    "upload",
+    "users",
+    "zap"
+  ]
+}
