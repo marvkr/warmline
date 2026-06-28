@@ -65,14 +65,14 @@ export default function Home() {
   }, [feed, desc]);
 
   return (
-    <div className="mx-auto max-w-5xl px-8 py-8">
+    <div className="w-full px-8 py-8">
       <header className="mb-7">
         <h1 className="text-xl font-semibold tracking-tight">
           Who to reach out to
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Ranked by how warm the path is and how well they fit your goal —
-          refreshed daily.
+        <p className="mt-1.5 text-sm text-foreground/60">
+          Ranked by how warm the path is and how well they fit your goal —{" "}
+          <span className="text-foreground/80 font-medium">refreshed daily</span>.
         </p>
       </header>
 
