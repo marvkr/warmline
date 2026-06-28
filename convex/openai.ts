@@ -24,6 +24,34 @@ export async function embed(text: string): Promise<number[]> {
   return data.data[0].embedding;
 }
 
+// Derive the ICP (who they sell to) from a scraped product site.
+export async function deriveIcp(siteMarkdown: string): Promise<string> {
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey()}`,
+    },
+    body: JSON.stringify({
+      model: CHAT_MODEL,
+      messages: [
+        {
+          role: "system",
+          content:
+            "From this company's website, write 1–2 sentences describing their ICP — the specific people they sell to (role, seniority, company type, domain). Be concrete. No preamble.",
+        },
+        { role: "user", content: siteMarkdown.slice(0, 6000) },
+      ],
+      temperature: 0.3,
+    }),
+  });
+  if (!res.ok) throw new Error(`OpenAI ICP ${res.status}`);
+  const data = (await res.json()) as {
+    choices: { message: { content: string } }[];
+  };
+  return data.choices[0]?.message?.content?.trim() ?? "";
+}
+
 export type Judgement = {
   why: { text: string; confidence: "high" | "medium" | "low" }[];
   how: { channel: string; angle: string; opener: string };

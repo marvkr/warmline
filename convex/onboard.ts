@@ -1,0 +1,66 @@
+import { action } from "./_generated/server";
+import { api, internal } from "./_generated/api";
+import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
+import { deriveIcp } from "./openai";
+
+// Scrape a product site → clean markdown (Firecrawl). Needs FIRECRAWL_API_KEY.
+async function scrapeSite(url: string): Promise<string> {
+  const key = process.env.FIRECRAWL_API_KEY;
+  if (!key) return "";
+  try {
+    const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        url,
+        formats: ["markdown"],
+        onlyMainContent: true,
+      }),
+    });
+    if (!res.ok) return "";
+    const data = (await res.json()) as { data?: { markdown?: string } };
+    return data.data?.markdown ?? "";
+  } catch {
+    return "";
+  }
+}
+
+// Onboarding: 3 links → derive the ICP from the product site → rank the feed
+// against it. The single call the onboarding screen awaits while it animates.
+export const generate = action({
+  args: {
+    website: v.optional(v.string()),
+    linkedin: v.optional(v.string()),
+    x: v.optional(v.string()),
+    judgeTopN: v.optional(v.number()),
+  },
+  returns: v.object({ icpId: v.id("icp"), icpText: v.string() }),
+  handler: async (ctx, args) => {
+    let icpText = "Growth and GTM engineers building with AI";
+    if (args.website) {
+      const md = await scrapeSite(args.website);
+      if (md) {
+        const derived = await deriveIcp(md);
+        if (derived) icpText = derived;
+      }
+    }
+
+    const icpId: Id<"icp"> = await ctx.runMutation(api.icp.saveIcp, {
+      text: icpText,
+      source: { website: args.website, linkedin: args.linkedin, x: args.x },
+    });
+
+    // rebuild embeds the ICP, scores leads (goal-fit × reachability), and writes
+    // the judged why/how recommendations.
+    await ctx.runAction(internal.rank.rebuild, {
+      icpId,
+      judgeTopN: args.judgeTopN ?? 10,
+    });
+
+    return { icpId, icpText };
+  },
+});

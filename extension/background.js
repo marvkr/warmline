@@ -18,6 +18,7 @@
 const DEFAULT_CONVEX_HTTP_URL = "https://fantastic-gazelle-504.convex.site";
 
 const QUEUE_KEY = "warmline:queue";
+const SYNCED_KEY = "warmline:synced";
 const URL_KEY = "warmline:convexHttpUrl";
 const RETRY_ALARM = "warmline:flush";
 const RETRY_PERIOD_MIN = 1; // retry queued items ~every minute while non-empty
@@ -146,6 +147,13 @@ async function flushQueue() {
             data && data.edges,
             "edge(s)",
           );
+          // Track synced items for popup display (keep last 50).
+          const synced = await getLocal(SYNCED_KEY);
+          const syncedList = Array.isArray(synced) ? synced : [];
+          const existing = syncedList.findIndex((s) => s.leadSlug === item.leadSlug);
+          if (existing >= 0) syncedList.splice(existing, 1);
+          syncedList.unshift({ ...item, syncedAt: Date.now() });
+          await setLocal(SYNCED_KEY, syncedList.slice(0, 50));
           continue; // drop from queue
         }
         if (res.status >= 400 && res.status < 500) {

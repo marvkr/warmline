@@ -65,7 +65,7 @@ export default function Home() {
   }, [feed, desc]);
 
   return (
-    <div className="max-w-[1500px] px-8 py-8">
+    <div className="mx-auto max-w-5xl px-8 py-8">
       <header className="mb-7">
         <h1 className="text-xl font-semibold tracking-tight">
           Who to reach out to

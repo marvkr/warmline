@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Warmline</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      oklch(0.16 0.008 285);
+    --surface: oklch(0.205 0.011 285);
+    --raised:  oklch(0.26 0.012 285);
+    --border:  oklch(1 0 0 / 0.08);
+    --ink:     oklch(0.95 0.006 80);
+    --muted:   oklch(0.64 0.014 285);
+    --accent:  oklch(0.905 0.035 90);
+    --green:   oklch(0.82 0.11 165);
+    --orange:  oklch(0.85 0.1 85);
+    --shadow:  0 2px 8px oklch(0 0 0 / 0.4), 0 1px 2px oklch(0 0 0 / 0.5);
+  }
+
+  body {
+    width: 320px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Text", sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+  .logo-mark {
+    width: 24px; height: 24px;
+    background: var(--accent);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.7), 0 1px 3px oklch(0 0 0 / 0.5);
+  }
+  .logo-mark svg { width: 14px; height: 14px; }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    background: var(--raised);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 3px 9px 3px 7px;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── Stats row ── */
+  .stats {
+    display: flex;
+    gap: 1px;
+    background: var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat {
+    flex: 1;
+    background: var(--surface);
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat-value {
+    font-size: 20px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 10.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    padding: 10px 16px 6px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Lead list ── */
+  .leads { padding: 0 8px 8px; display: flex; flex-direction: column; gap: 3px; }
+
+  .lead-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 9px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 120ms;
+    text-decoration: none;
+  }
+  .lead-row:hover { background: var(--raised); }
+
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--raised);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+
+  .lead-info { flex: 1; min-width: 0; }
+  .lead-name {
+    font-size: 13px;
+    font-weight: 550;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .lead-slug {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mutuals-badge {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: oklch(0.905 0.035 90 / 0.12);
+    border: 1px solid oklch(0.905 0.035 90 / 0.2);
+    border-radius: 99px;
+    padding: 2px 8px;
+  }
+
+  /* ── Empty state ── */
+  .empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .empty-icon {
+    width: 40px; height: 40px;
+    background: var(--raised);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+  }
+  .empty-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .empty-body { font-size: 12px; line-height: 1.55; max-width: 220px; }
+
+  /* ── Footer ── */
+  .footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .open-app {
+    font-size: 12px;
+    font-weight: 550;
+    color: var(--accent);
+    background: oklch(0.905 0.035 90 / 0.1);
+    border: 1px solid oklch(0.905 0.035 90 / 0.18);
+    border-radius: 7px;
+    padding: 5px 12px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 120ms;
+  }
+  .open-app:hover { background: oklch(0.905 0.035 90 / 0.18); }
+  .footer-meta { font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 7C2 4.79 3.79 3 6 3C8.21 3 10 4.79 10 7" stroke="oklch(0.2 0.012 285)" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M4.5 7C4.5 5.62 5.62 4.5 7 4.5C8.38 4.5 9.5 5.62 9.5 7" stroke="oklch(0.2 0.012 285)" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="7" cy="10" r="1.5" fill="oklch(0.2 0.012 285)"/>
+      </svg>
+    </div>
+    Warmline
+  </div>
+  <div class="status-pill">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Active</span>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-value" id="totalLeads">0</div>
+    <div class="stat-label">Leads captured</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="totalMutuals">0</div>
+    <div class="stat-label">Warm paths</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="totalSynced">0</div>
+    <div class="stat-label">Synced</div>
+  </div>
+</div>
+
+<div id="content">
+  <div class="empty">
+    <div class="empty-icon">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="10" r="7" stroke="oklch(0.64 0.014 285)" stroke-width="1.5"/>
+        <path d="M10 7V10.5" stroke="oklch(0.64 0.014 285)" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="10" cy="13" r="0.75" fill="oklch(0.64 0.014 285)"/>
+      </svg>
+    </div>
+    <div class="empty-title">No leads yet</div>
+    <div class="empty-body">Visit a LinkedIn profile to capture warm paths automatically.</div>
+  </div>
+</div>
+
+<div class="footer">
+  <span class="footer-meta" id="lastSync">—</span>
+  <a class="open-app" id="openApp" href="#" target="_blank">Open Warmline →</a>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
