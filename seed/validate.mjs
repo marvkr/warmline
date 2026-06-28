@@ -100,6 +100,17 @@ assert(
 // node cap: rendered fan-out must not exceed 12
 assert(fanoutTargets.length <= 12, "fan-out <= node cap (12)", `${fanoutTargets.length} > 12`);
 
+// reveal order: Han-only "cold" names lead; the people who are ALSO your direct connections land last
+const directConnIds = new Set(
+  edges.filter((e) => e.from_id === SELF && e.type === "linkedin_1st").map((e) => e.to_id),
+);
+const order = fanoutTargets; // Han->target co_attended edge order == on-screen reveal order
+const leadIsHanOnly = order.length > 0 && !directConnIds.has(order[0]);
+const tailAreDirect =
+  order.length >= 2 && directConnIds.has(order[order.length - 1]) && directConnIds.has(order[order.length - 2]);
+assert(leadIsHanOnly && tailAreDirect,
+  "fan-out leads with Han-only names; direct-connection people land last (kicker)", `order=${order.join(",")}`);
+
 // ---- confidence is not uniform and not randomized -------------------------
 const confs = fanoutEdges.map((e) => e.confidence);
 const distinct = new Set(confs);
@@ -147,6 +158,7 @@ if (determinismOk)
 const judgePeople = new Set(people.filter((p) => (p.roles || []).includes("judge")).map((p) => p.id));
 assert(judgePeople.size >= 1, "judge people present (kicker)", "none");
 assert("include_judge_edges" in flags, "judge toggle flag present", "flags.include_judge_edges missing");
+assert(flags.show_confidence_as === "tier", "fan-out per-face display set to tier (not raw decimal)", `show_confidence_as=${flags.show_confidence_as}`);
 const judgeEdges = edges.filter((e) => e.judge_kicker);
 assert(judgeEdges.length >= 2, "judge kicker edges present (Han->Danylo, Purav->Wayne)", `${judgeEdges.length}`);
 // simulate toggle OFF

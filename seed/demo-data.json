@@ -15,7 +15,8 @@
     "pii": "none — no emails / phones / DMs / logins; public fields only"
   },
   "flags": {
-    "include_judge_edges": true
+    "include_judge_edges": true,
+    "show_confidence_as": "tier"
   },
   "goals": [
     {
@@ -56,36 +57,6 @@
       "source": "linkedin_connection"
     },
     {
-      "id": "justin",
-      "name": "Justin Torre",
-      "headline": "Head of Enterprise, Mintlify",
-      "company": "Mintlify",
-      "linkedin_url": "https://linkedin.com/in/justintorre",
-      "x_handle": "justinstorre",
-      "avatar_url": null,
-      "is_self": false,
-      "is_target": true,
-      "roles": [
-        "fanout"
-      ],
-      "source": "luma_gala"
-    },
-    {
-      "id": "gabriel",
-      "name": "Gabriel Petersson",
-      "headline": "Research (Sora), OpenAI",
-      "company": "OpenAI",
-      "linkedin_url": "https://linkedin.com/in/gabriel-petersson-ai",
-      "x_handle": "GabrielPeterss4",
-      "avatar_url": null,
-      "is_self": false,
-      "is_target": true,
-      "roles": [
-        "fanout"
-      ],
-      "source": "luma_gala"
-    },
-    {
       "id": "dylan",
       "name": "Dylan Patel",
       "headline": "Founder, SemiAnalysis",
@@ -122,21 +93,6 @@
       "company": "Cartesia",
       "linkedin_url": "https://linkedin.com/in/albert-gu-8ab677139",
       "x_handle": "_albertgu",
-      "avatar_url": null,
-      "is_self": false,
-      "is_target": true,
-      "roles": [
-        "fanout"
-      ],
-      "source": "luma_gala"
-    },
-    {
-      "id": "ben",
-      "name": "Ben Tossell",
-      "headline": "Founder, Ben's Bites",
-      "company": "Ben's Bites",
-      "linkedin_url": null,
-      "x_handle": "bentossell",
       "avatar_url": null,
       "is_self": false,
       "is_target": true,
@@ -191,10 +147,40 @@
       "source": "luma_gala"
     },
     {
+      "id": "ben",
+      "name": "Ben Tossell",
+      "headline": "Founder, Ben's Bites",
+      "company": "Ben's Bites",
+      "linkedin_url": null,
+      "x_handle": "bentossell",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "evan",
+      "name": "Evan Bacon",
+      "headline": "Expo (React Native)",
+      "company": "Expo",
+      "linkedin_url": "https://linkedin.com/in/evanbacon",
+      "x_handle": "baconbrix",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
       "id": "aron",
       "name": "Aron Korenblit",
-      "headline": "Automation educator",
-      "company": "Independent",
+      "headline": "Community & Education, Gumloop",
+      "company": "Gumloop",
       "linkedin_url": "https://linkedin.com/in/aronkor",
       "x_handle": "aronkor",
       "avatar_url": null,
@@ -221,12 +207,27 @@
       "source": "luma_gala"
     },
     {
-      "id": "evan",
-      "name": "Evan Bacon",
-      "headline": "Expo (React Native)",
-      "company": "Expo",
-      "linkedin_url": "https://linkedin.com/in/evanbacon",
-      "x_handle": "baconbrix",
+      "id": "justin",
+      "name": "Justin Torre",
+      "headline": "Head of Enterprise, Mintlify",
+      "company": "Mintlify",
+      "linkedin_url": "https://linkedin.com/in/justintorre",
+      "x_handle": "justinstorre",
+      "avatar_url": null,
+      "is_self": false,
+      "is_target": true,
+      "roles": [
+        "fanout"
+      ],
+      "source": "luma_gala"
+    },
+    {
+      "id": "gabriel",
+      "name": "Gabriel Petersson",
+      "headline": "Research (Sora), OpenAI",
+      "company": "OpenAI",
+      "linkedin_url": "https://linkedin.com/in/gabriel-petersson-ai",
+      "x_handle": "GabrielPeterss4",
       "avatar_url": null,
       "is_self": false,
       "is_target": true,
@@ -378,18 +379,18 @@
       "date": "2026-04-16",
       "attendee_ids": [
         "han",
-        "justin",
-        "gabriel",
         "dylan",
         "jeff",
         "albert",
-        "ben",
         "aiden",
         "james",
         "cameron",
+        "ben",
+        "evan",
         "aron",
         "jessy",
-        "evan",
+        "justin",
+        "gabriel",
         "danylo"
       ]
     },
@@ -414,6 +415,116 @@
       "confidence_generated": false,
       "judge_kicker": false,
       "event_id": null
+    },
+    {
+      "from_id": "han",
+      "to_id": "dylan",
+      "type": "co_attended_event",
+      "confidence": 0.51,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "jeff",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "albert",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "aiden",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "james",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "cameron",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "ben",
+      "type": "co_attended_event",
+      "confidence": 0.51,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "evan",
+      "type": "co_attended_event",
+      "confidence": 0.55,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "aron",
+      "type": "co_attended_event",
+      "confidence": 0.51,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
+    },
+    {
+      "from_id": "han",
+      "to_id": "jessy",
+      "type": "co_attended_event",
+      "confidence": 0.48,
+      "evidence": "Both attended Mintlify Gala, 2026-04-16",
+      "confidence_tier": "Medium",
+      "confidence_generated": true,
+      "judge_kicker": false,
+      "event_id": "evt_mintlify_gala"
     },
     {
       "from_id": "han",
@@ -458,116 +569,6 @@
       "confidence_generated": false,
       "judge_kicker": false,
       "event_id": null
-    },
-    {
-      "from_id": "han",
-      "to_id": "dylan",
-      "type": "co_attended_event",
-      "confidence": 0.51,
-      "evidence": "Both attended Mintlify Gala, 2026-04-16",
-      "confidence_tier": "Medium",
-      "confidence_generated": true,
-      "judge_kicker": false,
-      "event_id": "evt_mintlify_gala"
-    },
-    {
-      "from_id": "han",
-      "to_id": "jeff",
-      "type": "co_attended_event",
-      "confidence": 0.55,
-      "evidence": "Both attended Mintlify Gala, 2026-04-16",
-      "confidence_tier": "Medium",
-      "confidence_generated": true,
-      "judge_kicker": false,
-      "event_id": "evt_mintlify_gala"
-    },
-    {
-      "from_id": "han",
-      "to_id": "albert",
-      "type": "co_attended_event",
-      "confidence": 0.55,
-      "evidence": "Both attended Mintlify Gala, 2026-04-16",
-      "confidence_tier": "Medium",
-      "confidence_generated": true,
-      "judge_kicker": false,
-      "event_id": "evt_mintlify_gala"
-    },
-    {
-      "from_id": "han",
-      "to_id": "ben",
-      "type": "co_attended_event",
-      "confidence": 0.51,
-      "evidence": "Both attended Mintlify Gala, 2026-04-16",
-      "confidence_tier": "Medium",
-      "confidence_generated": true,
-      "judge_kicker": false,
-      "event_id": "evt_mintlify_gala"
-    },
-    {
-      "from_id": "han",
-      "to_id": "aiden",
-      "type": "co_attended_event",
-      "confidence": 0.55,
-      "evidence": "Both attended Mintlify Gala, 2026-04-16",
-      "confidence_tier": "Medium",
-      "confidence_generated": true,
-      "judge_kicker": false,
-      "event_id": "evt_mintlify_gala"
-    },
-    {
-      "from_id": "han",
-      "to_id": "james",
-      "type": "co_attended_event",
-      "confidence": 0.55,
-      "evidence": "Both attended Mintlify Gala, 2026-04-16",
-      "confidence_tier": "Medium",
-      "confidence_generated": true,
-      "judge_kicker": false,
-      "event_id": "evt_mintlify_gala"
-    },
-    {
-      "from_id": "han",
-      "to_id": "cameron",
-      "type": "co_attended_event",
-      "confidence": 0.55,
-      "evidence": "Both attended Mintlify Gala, 2026-04-16",
-      "confidence_tier": "Medium",
-      "confidence_generated": true,
-      "judge_kicker": false,
-      "event_id": "evt_mintlify_gala"
-    },
-    {
-      "from_id": "han",
-      "to_id": "aron",
-      "type": "co_attended_event",
-      "confidence": 0.51,
-      "evidence": "Both attended Mintlify Gala, 2026-04-16",
-      "confidence_tier": "Medium",
-      "confidence_generated": true,
-      "judge_kicker": false,
-      "event_id": "evt_mintlify_gala"
-    },
-    {
-      "from_id": "han",
-      "to_id": "jessy",
-      "type": "co_attended_event",
-      "confidence": 0.48,
-      "evidence": "Both attended Mintlify Gala, 2026-04-16",
-      "confidence_tier": "Medium",
-      "confidence_generated": true,
-      "judge_kicker": false,
-      "event_id": "evt_mintlify_gala"
-    },
-    {
-      "from_id": "han",
-      "to_id": "evan",
-      "type": "co_attended_event",
-      "confidence": 0.55,
-      "evidence": "Both attended Mintlify Gala, 2026-04-16",
-      "confidence_tier": "Medium",
-      "confidence_generated": true,
-      "judge_kicker": false,
-      "event_id": "evt_mintlify_gala"
     },
     {
       "from_id": "self",
@@ -691,18 +692,18 @@
       },
       "how_generated": true,
       "unlocks_ids": [
-        "justin",
-        "gabriel",
         "dylan",
         "jeff",
         "albert",
-        "ben",
         "aiden",
         "james",
         "cameron",
+        "ben",
+        "evan",
         "aron",
         "jessy",
-        "evan"
+        "justin",
+        "gabriel"
       ]
     },
     {

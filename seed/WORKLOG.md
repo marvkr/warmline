@@ -67,5 +67,17 @@ and non-uniform Mediums (0.48 / 0.51 / 0.55). Marked model-generated per Claims 
 - Go-cold trigger is illustrative (flagged `trigger_generated:true`); optionally swap in a real public
   Cristina/Linear signal before filming Beat 5.
 
+## Post-review display tweaks (2026-06-28, after Zach's walkthrough — still local, not pushed)
+Three on-camera display refinements requested by Zach; data values unchanged, all flagged-honesty intact:
+1. Per-face confidence now shows the **tier (High/Medium)**, not the raw decimal — added
+   `flags.show_confidence_as: "tier"` (decimals stay in the data for ranking + Beat-4 live reorder).
+   Protects the "real model" claim from the six-identical-0.55 optics.
+2. **Reveal order reordered**: Han-only cold names lead (Dylan, Jeff, Albert …); Justin + Gabriel
+   (your direct connections) land LAST as the "already one step in" kicker. Locked by a new validator
+   check so a regenerate can't silently break it.
+3. **Aron Korenblit** relabeled "Independent" → **Gumloop** ("Community & Education, Gumloop") —
+   verified current via web (he leads community/education at Gumloop, runs Automate All The Things).
+Evan Bacon kept. `validate.mjs` now 39/39 green.
+
 ## Next up
-Focused re-review → REVIEW.md → SUMMARY.md → STATUS=DONE → final local commit. (No push.)
+None — build complete, refined, and committed locally on zach/demo-data. Awaiting Zach's manual push.

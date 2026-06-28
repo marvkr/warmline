@@ -52,33 +52,39 @@ const HAN = {
 };
 
 // The 12 rendered fan-out targets (is_target). `mintlify` => shares Han's employer.
+// ORDER MATTERS: this array is the on-screen fan-out reveal order. The Han-only "cold" names lead
+// (biggest first: Dylan / Jeff / Albert ...), and the two people who are ALSO your direct 1st-degree
+// connections (Justin, Gabriel) land LAST as the "...and you're already one step in" kicker — so the
+// reveal isn't fronted by people you don't actually need Han to reach.
 const FANOUT = [
-  { id: "justin", name: "Justin Torre", headline: "Head of Enterprise, Mintlify", company: "Mintlify",
-    linkedin_url: "https://linkedin.com/in/justintorre", x_handle: "justinstorre",
-    rel: "core", mintlify: true, connectedOn: "2025-01-23" },
-  { id: "gabriel", name: "Gabriel Petersson", headline: "Research (Sora), OpenAI", company: "OpenAI",
-    linkedin_url: "https://linkedin.com/in/gabriel-petersson-ai", x_handle: "GabrielPeterss4",
-    rel: "broader", connectedOn: "2024-12-05" },
+  // --- Han-only cold names (reachable only through Han) — lead the reveal, biggest names first ---
   { id: "dylan", name: "Dylan Patel", headline: "Founder, SemiAnalysis", company: "SemiAnalysis",
     linkedin_url: "https://linkedin.com/in/dylanpatelsa", x_handle: "dylan522p", rel: "adjacent" },
   { id: "jeff", name: "Jeff Huber", headline: "Founder, Chroma", company: "Chroma",
     linkedin_url: "https://linkedin.com/in/jeffchuber", x_handle: "jeffreyhuber", rel: "core" },
   { id: "albert", name: "Albert Gu", headline: "Co-Founder, Cartesia (Mamba)", company: "Cartesia",
     linkedin_url: "https://linkedin.com/in/albert-gu-8ab677139", x_handle: "_albertgu", rel: "core" },
-  { id: "ben", name: "Ben Tossell", headline: "Founder, Ben's Bites", company: "Ben's Bites",
-    linkedin_url: null, x_handle: "bentossell", rel: "adjacent" },
   { id: "aiden", name: "Aiden Bai", headline: "Creator, React Scan / Million.js", company: "React Scan",
     linkedin_url: "https://linkedin.com/in/aidenbai", x_handle: "aidenybai", rel: "core" },
   { id: "james", name: "James Grugett", headline: "Co-Founder, Manifold", company: "Manifold",
     linkedin_url: "https://linkedin.com/in/james-grugett", x_handle: "jahooma", rel: "core" },
   { id: "cameron", name: "Cameron Pfiffer", headline: "Dev / Community, Letta", company: "Letta",
     linkedin_url: "https://linkedin.com/in/cameron-pfiffer", x_handle: "just_cameron", rel: "core" },
-  { id: "aron", name: "Aron Korenblit", headline: "Automation educator", company: "Independent",
+  { id: "ben", name: "Ben Tossell", headline: "Founder, Ben's Bites", company: "Ben's Bites",
+    linkedin_url: null, x_handle: "bentossell", rel: "adjacent" },
+  { id: "evan", name: "Evan Bacon", headline: "Expo (React Native)", company: "Expo",
+    linkedin_url: "https://linkedin.com/in/evanbacon", x_handle: "baconbrix", rel: "core" },
+  { id: "aron", name: "Aron Korenblit", headline: "Community & Education, Gumloop", company: "Gumloop",
     linkedin_url: "https://linkedin.com/in/aronkor", x_handle: "aronkor", rel: "adjacent" },
   { id: "jessy", name: "Jessy Lin", headline: "AI Researcher, UC Berkeley", company: "UC Berkeley",
     linkedin_url: "https://linkedin.com/in/jessylin", x_handle: "realJessyLin", rel: "broader" },
-  { id: "evan", name: "Evan Bacon", headline: "Expo (React Native)", company: "Expo",
-    linkedin_url: "https://linkedin.com/in/evanbacon", x_handle: "baconbrix", rel: "core" },
+  // --- Already your direct 1st-degree connections — land LAST as the "one step in" kicker ---
+  { id: "justin", name: "Justin Torre", headline: "Head of Enterprise, Mintlify", company: "Mintlify",
+    linkedin_url: "https://linkedin.com/in/justintorre", x_handle: "justinstorre",
+    rel: "core", mintlify: true, connectedOn: "2025-01-23" },
+  { id: "gabriel", name: "Gabriel Petersson", headline: "Research (Sora), OpenAI", company: "OpenAI",
+    linkedin_url: "https://linkedin.com/in/gabriel-petersson-ai", x_handle: "GabrielPeterss4",
+    rel: "broader", connectedOn: "2024-12-05" },
 ];
 
 // Judge kicker (optional, toggleable). Purav is a real connection; the kicker edges are Han->Danylo
@@ -299,6 +305,10 @@ const data = {
     // The clearly-named judge toggle. Render with this false => drop role:'judge' people and
     // judge_kicker:true edges; hero path + 12 fan-out stay intact.
     include_judge_edges: true,
+    // Per-face confidence display. "tier" => each fan-out face shows its High/Medium badge, NOT the
+    // raw decimal (protects the Beat-4 "real model" claim from the six-identical-0.55 optics). The
+    // numeric `confidence` stays in the data and still drives ranking + the Beat-4 live reorder.
+    show_confidence_as: "tier",
   },
   goals,
   people,

@@ -75,6 +75,10 @@ The dataset is a single JSON document, `seed/demo-data.json`, with top-level key
 - `include_judge_edges` (bool) — the **clearly-named toggle**. When a consumer renders with this
   `false`, it must drop every Person with role `judge` and every Edge with `judge_kicker === true`.
   The hero path + 12 fan-out remain fully intact without them.
+- `show_confidence_as` (`"tier"` | `"score"`) — per-face confidence display. `"tier"` (current)
+  means each fan-out face shows its `confidence_tier` (High/Medium) badge, **not** the raw decimal —
+  this protects the Beat-4 "real model" claim from the optics of several identical Medium decimals.
+  The numeric `confidence` stays in the data and still drives ranking + the Beat-4 live reranking.
 
 ---
 
