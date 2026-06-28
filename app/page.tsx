@@ -17,7 +17,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AvatarGroup } from "@/components/ui/avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -65,7 +64,7 @@ export default function Home() {
   }, [feed, desc]);
 
   return (
-    <div className="w-full px-8 py-8">
+    <div className="w-full px-4 py-8">
       <header className="mb-7">
         <h1 className="text-xl font-semibold tracking-tight">
           Who to reach out to
@@ -239,12 +238,6 @@ function FeedRowView({
         {/* Score */}
         <TableCell className="align-top">
           <div className="text-2xl font-semibold tabular-nums">{row.score}</div>
-          <div className="mt-2 flex items-center gap-2">
-            <Progress value={row.tieStrength} className="h-1.5 w-14" />
-            <span className="text-[11px] text-muted-foreground">
-              {row.tieStrength}
-            </span>
-          </div>
         </TableCell>
 
         {/* Why */}
@@ -325,6 +318,14 @@ function FeedRowView({
       {expanded && (
         <TableRow>
           <TableCell colSpan={6} className="bg-muted/10 p-3">
+            {row.opener ? (
+              <div className="mb-3 rounded-lg border border-border bg-card p-3 [box-shadow:var(--shadow-s)]">
+                <div className="mb-1 text-xs font-medium text-muted-foreground">
+                  Drafted opener · {row.how}
+                </div>
+                <p className="text-sm text-foreground">{row.opener}</p>
+              </div>
+            ) : null}
             <GraphAccordion personId={row.id} />
           </TableCell>
         </TableRow>

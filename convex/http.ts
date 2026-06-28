@@ -9,8 +9,8 @@ auth.addHttpRoutes(http);
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
 // Browser extension posts mutual connections read off a Lead's LinkedIn profile.
@@ -48,6 +48,26 @@ http.route({
 
 http.route({
   path: "/extension/mutuals",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: cors })),
+});
+
+// Returns leads whose mutual connections haven't been captured yet.
+http.route({
+  path: "/extension/leads",
+  method: "GET",
+  handler: httpAction(async (ctx, req) => {
+    const token = process.env.WARMLINE_EXTENSION_TOKEN;
+    if (token && req.headers.get("Authorization") !== `Bearer ${token}`) {
+      return new Response("unauthorized", { status: 401, headers: cors });
+    }
+    const leads = await ctx.runQuery(internal.extension.pendingLeads, {});
+    return Response.json({ leads }, { headers: cors });
+  }),
+});
+
+http.route({
+  path: "/extension/leads",
   method: "OPTIONS",
   handler: httpAction(async () => new Response(null, { headers: cors })),
 });

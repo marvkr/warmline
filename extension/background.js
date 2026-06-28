@@ -175,15 +175,102 @@ async function flushQueue() {
   }
 }
 
+// ---- auto-sync (visit each pending lead's LinkedIn profile) -----------------
+
+const SYNC_KEY = "warmline:autoSync";
+const VISIT_TIMEOUT_MS = 20000; // 20s per profile before giving up
+const VISIT_DELAY_MS = 4000;    // 4s between tabs (LinkedIn rate-limit safety)
+
+let syncTabId = null;
+let syncResolve = null;
+
+function visitLead(slug) {
+  return new Promise((resolve) => {
+    const done = () => {
+      syncResolve = null;
+      if (syncTabId !== null) {
+        chrome.tabs.remove(syncTabId, () => void chrome.runtime.lastError);
+        syncTabId = null;
+      }
+      resolve();
+    };
+    const timer = setTimeout(done, VISIT_TIMEOUT_MS);
+    syncResolve = () => { clearTimeout(timer); done(); };
+    chrome.tabs.create(
+      { url: `https://www.linkedin.com/in/${encodeURIComponent(slug)}`, active: false },
+      (tab) => { syncTabId = tab ? tab.id : null; }
+    );
+  });
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+let syncing = false;
+
+async function runAutoSync() {
+  if (syncing) return;
+  syncing = true;
+  try {
+    const url = await getConvexUrl();
+    if (!url) {
+      await setLocal(SYNC_KEY, { status: "error", message: "Convex URL not configured" });
+      return;
+    }
+
+    let leads;
+    try {
+      const res = await fetch(`${url}/extension/leads`);
+      if (!res.ok) throw new Error(`${res.status}`);
+      ({ leads } = await res.json());
+    } catch (e) {
+      await setLocal(SYNC_KEY, { status: "error", message: String(e) });
+      return;
+    }
+
+    if (!leads || !leads.length) {
+      await setLocal(SYNC_KEY, { status: "done", total: 0, done: 0, current: null });
+      return;
+    }
+
+    for (let i = 0; i < leads.length; i++) {
+      const lead = leads[i];
+      await setLocal(SYNC_KEY, {
+        status: "running",
+        total: leads.length,
+        done: i,
+        current: lead.name || lead.slug,
+      });
+      await visitLead(lead.slug);
+      if (i < leads.length - 1) await sleep(VISIT_DELAY_MS);
+    }
+
+    await setLocal(SYNC_KEY, { status: "done", total: leads.length, done: leads.length, current: null });
+    await flushQueue();
+  } finally {
+    syncing = false;
+  }
+}
+
 // ---- wiring -----------------------------------------------------------------
 
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg && msg.type === "warmline:mutuals" && msg.payload && msg.payload.leadSlug) {
+    // If this came from the current auto-sync tab, signal it done.
+    if (syncResolve && sender.tab && sender.tab.id === syncTabId) {
+      syncResolve();
+    }
     enqueue(msg.payload)
       .then(() => flushQueue())
       .then(() => sendResponse({ ok: true }))
       .catch((e) => sendResponse({ ok: false, error: String(e) }));
-    return true; // keep the message channel open for the async response
+    return true;
+  }
+  if (msg && msg.type === "warmline:startSync") {
+    runAutoSync();
+    sendResponse({ ok: true });
+    return false;
   }
   return false;
 });

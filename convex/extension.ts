@@ -1,4 +1,4 @@
-import { internalMutation } from "./_generated/server";
+import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 import { MutationCtx } from "./_generated/server";
@@ -63,5 +63,19 @@ export const ingestMutuals = internalMutation({
     }
     await ctx.db.patch(leadId, { mutualsStatus: "done" });
     return { edges };
+  },
+});
+
+export const pendingLeads = internalQuery({
+  args: {},
+  returns: v.array(v.object({ slug: v.string(), name: v.string() })),
+  handler: async (ctx) => {
+    const leads = await ctx.db
+      .query("persons")
+      .withIndex("by_role", (q) => q.eq("role", "lead"))
+      .collect();
+    return leads
+      .filter((p) => p.mutualsStatus !== "done" && p.linkedinUrl)
+      .map((p) => ({ slug: p.linkedinUrl!, name: p.name }));
   },
 });
