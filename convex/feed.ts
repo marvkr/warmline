@@ -33,6 +33,7 @@ const feedRow = v.object({
   why: v.array(v.object({ text: v.string(), confidence })),
   mutuals: v.array(v.object({ name: v.string(), initials: v.string() })),
   how: v.string(),
+  opener: v.optional(v.string()),
 });
 
 const GATEKEEPER_MIN = 8;
@@ -91,14 +92,16 @@ type Pre = {
   score: number;
   why: WhyBullet[];
   how: string;
+  opener?: string;
 };
 
+// Short, consistent "how" line for the column (the full drafted opener lives on
+// the row's `opener` and shows in the expanded view).
 function heuristicHow(p: Doc<"persons">): string {
-  if (p.role === "connector")
-    return "Befriend them — they unlock leads in your ICP.";
+  if (p.role === "connector") return "Connect — opens leads in your ICP";
   return p.relationshipToYou === "connected"
-    ? "Reach out directly — draft an opener from their recent activity."
-    : "Ask a mutual connector for the intro.";
+    ? "Reach out directly"
+    : "Ask a mutual for the intro";
 }
 
 export const list = query({
@@ -128,7 +131,8 @@ export const list = query({
             text: w.text,
             confidence: confLabel(w.confidence),
           })),
-          how: `${r.how.channel}: ${r.how.opener}`.trim(),
+          how: (r.how as string[]).filter(Boolean).join(" · "),
+          opener: r.opener ?? "",
         });
       }
     } else {
@@ -180,6 +184,7 @@ export const list = query({
         why: x.why,
         mutuals: p.role === "lead" ? await mutualsFor(ctx, p._id) : [],
         how: x.how,
+        opener: x.opener,
       });
     }
     return rows;

@@ -143,11 +143,8 @@ export const writeRecommendation = internalMutation({
         confidence: v.number(),
       }),
     ),
-    how: v.object({
-      channel: v.string(),
-      angle: v.string(),
-      opener: v.string(),
-    }),
+    how: v.array(v.string()),
+    opener: v.string(),
     unlocksIds: v.array(v.id("persons")),
   },
   returns: v.id("recommendations"),
@@ -166,6 +163,7 @@ export const writeRecommendation = internalMutation({
       score: args.score,
       whyBullets: args.whyBullets,
       how: args.how,
+      opener: args.opener,
       unlocksIds: args.unlocksIds,
     });
   },
@@ -240,9 +238,6 @@ export const rebuild = internalAction({
         internal.rank.connectorsForLead,
         { leadId: lead.id },
       );
-      const bridge = connectors.length
-        ? `${connectors[0].name}: ${connectors[0].evidence}`
-        : undefined;
       const j = await judge({
         icpText: data.icpText,
         person: {
@@ -250,7 +245,10 @@ export const rebuild = internalAction({
           headline: lead.headline ?? undefined,
           company: lead.company ?? undefined,
         },
-        bridge,
+        connectors: connectors.map((c) => ({
+          name: c.name,
+          evidence: c.evidence,
+        })),
       });
       await ctx.runMutation(internal.rank.writeRecommendation, {
         icpId: args.icpId,
@@ -261,6 +259,7 @@ export const rebuild = internalAction({
           confidence: confNum(w.confidence),
         })),
         how: j.how,
+        opener: j.opener,
         unlocksIds: [],
       });
       judged++;

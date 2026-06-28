@@ -124,11 +124,8 @@ export default defineSchema({
     whyBullets: v.array(
       v.object({ text: v.string(), confidence: v.number() }),
     ),
-    how: v.object({
-      channel: v.string(),
-      angle: v.string(),
-      opener: v.string(),
-    }),
+    how: v.union(v.array(v.string()), v.object({ channel: v.string(), angle: v.string(), opener: v.string() })),
+    opener: v.optional(v.string()),
     // Connector fan-out (leads they unlock) — bounded by the ≤12 node cap, inline array ok.
     unlocksIds: v.array(v.id("persons")),
     whyNow: v.optional(v.string()), // trigger: job change / new post / event
