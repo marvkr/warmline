@@ -6,8 +6,6 @@ import type { FunctionReturnType } from "convex/server";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import {
-  ChevronDownIcon,
-  ChevronUpIcon,
   KeyIcon,
   ThumbsDownIcon,
   ThumbsUpIcon,
@@ -53,7 +51,6 @@ function xHref(handle?: string) {
 
 export default function Home() {
   const router = useRouter();
-  const [desc, setDesc] = useState(true);
   const [expanded, setExpanded] = useState<Id<"persons"> | null>(null);
 
   const feed = useQuery(api.feed.list, { limit: 40 });
@@ -66,8 +63,8 @@ export default function Home() {
 
   const rows = useMemo(() => {
     const data = feed ?? [];
-    return [...data].sort((a, b) => (desc ? b.score - a.score : a.score - b.score));
-  }, [feed, desc]);
+    return [...data].sort((a, b) => b.score - a.score);
+  }, [feed]);
 
   return (
     <div className="w-full px-4 py-8">
@@ -95,19 +92,6 @@ export default function Home() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[210px]">Person</TableHead>
-                <TableHead className="w-[118px]">
-                  <button
-                    onClick={() => setDesc((d) => !d)}
-                    className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
-                  >
-                    Score{" "}
-                    {desc ? (
-                      <ChevronDownIcon className="size-3.5" />
-                    ) : (
-                      <ChevronUpIcon className="size-3.5" />
-                    )}
-                  </button>
-                </TableHead>
                 <TableHead className="min-w-[300px]">Why</TableHead>
                 <TableHead className="min-w-[240px]">How</TableHead>
                 <TableHead className="w-[100px]">Mutuals</TableHead>
@@ -241,11 +225,6 @@ function FeedRowView({
           </div>
         </TableCell>
 
-        {/* Score */}
-        <TableCell className="align-top">
-          <div className="text-2xl font-semibold tabular-nums">{row.score}</div>
-        </TableCell>
-
         {/* Why */}
         <TableCell className="align-top">
           <ul className="space-y-1.5">
@@ -323,7 +302,7 @@ function FeedRowView({
 
       {expanded && (
         <TableRow>
-          <TableCell colSpan={6} className="bg-muted/10 p-3">
+          <TableCell colSpan={5} className="bg-muted/10 p-3">
             {row.opener ? (
               <div className="mb-3 rounded-lg border border-border bg-card p-3 [box-shadow:var(--shadow-s)]">
                 <div className="mb-1 text-xs font-medium text-muted-foreground">
