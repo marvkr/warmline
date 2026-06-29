@@ -4,6 +4,32 @@ import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 import { paginationOptsValidator } from "convex/server";
 
+// Fiber kitchen-sink response: { output: { data: [{ experiences: [...], headline?: string }] } }
+function extractCompanyFromFiber(raw: unknown): { company?: string; headline?: string } {
+  if (!raw || typeof raw !== "object") return {};
+  const r = raw as Record<string, unknown>;
+  const output = r.output as Record<string, unknown> | undefined;
+  const dataArr = output?.data;
+  const person = Array.isArray(dataArr) ? (dataArr[0] as Record<string, unknown>) : undefined;
+  if (!person) return {};
+
+  const headline = typeof person.headline === "string" ? person.headline : undefined;
+
+  const experiences = person.experiences;
+  if (Array.isArray(experiences)) {
+    for (const exp of experiences) {
+      if (!exp || typeof exp !== "object") continue;
+      const e = exp as Record<string, unknown>;
+      if (!e.is_current) continue;
+      const company = typeof e.company_name === "string" ? e.company_name : undefined;
+      const title = typeof e.title === "string" ? e.title : undefined;
+      if (company) return { company, headline: headline ?? title };
+    }
+  }
+
+  return { headline };
+}
+
 // Backward-resolution: build connector→lead bridges from data we already have.
 // v1 signal = shared_company (exact company match). X-mutual-follow / engagement
 // edges come from Fiber actions later. Run via `computeEdges`.
@@ -89,6 +115,84 @@ export const setUnlockValues = internalMutation({
       const p = await ctx.db.get(id);
       if (p) await ctx.db.patch(id, { unlockValue: count });
     }
+    return null;
+  },
+});
+
+// Fetch fresh company/headline for every connector that has a LinkedIn slug,
+// patch the DB, then recompute shared_company edges.
+export const refreshConnectorCompanies = internalAction({
+  args: { limit: v.optional(v.number()) },
+  returns: v.object({ updated: v.number(), failed: v.number() }),
+  handler: async (ctx) => {
+    const apiKey = process.env.FIBER_API_KEY;
+    if (!apiKey) throw new Error("FIBER_API_KEY not set");
+
+    const connectors: { _id: Id<"persons">; linkedinUrl?: string }[] =
+      await ctx.runQuery(internal.edges.connectorsWithSlug, {
+        limit: 500,
+      });
+
+    let updated = 0;
+    let failed = 0;
+
+    for (const c of connectors) {
+      if (!c.linkedinUrl) continue;
+      try {
+        const res = await fetch("https://api.fiber.ai/v1/kitchen-sink/person", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            apiKey,
+            profileIdentifier: { identifier: "linkedinSlug", value: c.linkedinUrl },
+          }),
+        });
+        if (!res.ok) { failed++; continue; }
+        const { company, headline } = extractCompanyFromFiber(await res.json());
+        if (company) {
+          await ctx.runMutation(internal.edges.patchPerson, {
+            id: c._id,
+            company,
+            headline,
+          });
+          updated++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+
+    // recompute edges with fresh company data
+    await ctx.runAction(internal.edges.computeEdges, {});
+    return { updated, failed };
+  },
+});
+
+export const connectorsWithSlug = internalQuery({
+  args: { limit: v.number() },
+  returns: v.array(v.object({ _id: v.id("persons"), linkedinUrl: v.optional(v.string()) })),
+  handler: async (ctx, args) => {
+    const all = await ctx.db
+      .query("persons")
+      .withIndex("by_role", (q) => q.eq("role", "connector"))
+      .take(args.limit);
+    return all
+      .filter((p) => !!p.linkedinUrl)
+      .map((p) => ({ _id: p._id, linkedinUrl: p.linkedinUrl }));
+  },
+});
+
+export const patchPerson = internalMutation({
+  args: {
+    id: v.id("persons"),
+    company: v.string(),
+    headline: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const patch: Record<string, string> = { company: args.company };
+    if (args.headline) patch.headline = args.headline;
+    await ctx.db.patch(args.id, patch);
     return null;
   },
 });
