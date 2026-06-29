@@ -268,22 +268,18 @@ function ConnectStep({
         The more contacts you add, the warmer your paths.
       </p>
 
-      <div className="mt-6 grid grid-cols-3 gap-2.5">
-        <OAuthCard
-          Icon={GoogleIcon}
-          name="Google"
-          blurb="Contacts, calendar, and email headers."
-
-          connected={!!connected.google}
-          startUrl="/api/connectors/google"
-          buttonLabel="Connect Google"
-        />
+      <div className="mt-6 grid grid-cols-2 gap-2.5">
+        <div className="col-span-2">
+          <ExtensionCard
+            connected={!!connected.extension}
+            onMark={onExtensionRecord}
+          />
+        </div>
 
         <FileCard
           Icon={LinkedinIcon}
           name="LinkedIn"
           blurb="Import your connections export."
-
           connected={!!connected.linkedin}
           busy={!!uploadBusy.linkedin}
           accept=".zip,application/zip"
@@ -296,11 +292,18 @@ function ConnectStep({
           onFile={(f) => onFileUpload("linkedin", f, true)}
         />
 
+        <OAuthCard
+          Icon={GoogleIcon}
+          name="Google"
+          blurb="Contacts, calendar, and email headers."
+          connected={!!connected.google}
+          startUrl="/api/connectors/google"
+        />
+
         <FileCard
           Icon={XIcon}
           name="Twitter / X"
           blurb="Import your followers archive."
-
           connected={!!connected.twitter}
           busy={!!uploadBusy.twitter}
           accept=".zip,application/zip"
@@ -314,7 +317,6 @@ function ConnectStep({
           Icon={LumaIcon}
           name="Luma"
           blurb="Add guests from events you host."
-
           connected={!!connected.luma}
           busy={!!uploadBusy.luma}
           accept=".csv,text/csv"
@@ -331,15 +333,12 @@ function ConnectStep({
           Icon={InstagramIcon}
           name="Instagram"
           blurb="Add your mutual followers."
-
           connected={!!connected.instagram}
           busy={!!uploadBusy.instagram}
           accept=".zip,.json,.html,application/zip,application/json,text/html"
           acceptLabel="ZIP, JSON, or HTML"
           exportUrl="https://accountscenter.instagram.com/info_and_permissions/dyi/"
-          guide={[
-            { text: "Request a download → Connections → JSON or HTML." },
-          ]}
+          guide={[{ text: "Request a download → Connections → JSON or HTML." }]}
           onFile={(f) => onFileUpload("instagram", f)}
         />
 
@@ -347,15 +346,8 @@ function ConnectStep({
           Icon={OutlookIcon}
           name="Outlook"
           blurb="Contacts from recent email activity."
-
           connected={!!connected.outlook}
           startUrl="/api/connectors/outlook"
-          buttonLabel="Connect Outlook"
-        />
-
-        <ExtensionCard
-          connected={!!connected.extension}
-          onMark={onExtensionRecord}
         />
       </div>
 
@@ -409,23 +401,41 @@ function SourceCard({
 }
 
 function OAuthCard({
-  Icon, name, blurb, connected, startUrl, buttonLabel,
+  Icon, name, blurb, connected, startUrl,
 }: {
   Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   name: string; blurb: string;
-  connected: boolean; startUrl: string; buttonLabel: string;
+  connected: boolean; startUrl: string;
 }) {
   return (
-    <SourceCard Icon={Icon} name={name} blurb={blurb} connected={connected}>
+    <div className={cn(
+      "flex items-center gap-3 rounded-xl border bg-card p-4 [box-shadow:var(--shadow-s)]",
+      connected ? "border-[oklch(0.42_0.11_152/0.4)]" : "border-border",
+    )}>
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg [background-image:var(--velour-raised)] [box-shadow:var(--shadow-button)]">
+        <Icon className="size-4.5" aria-hidden />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-foreground">{name}</span>
+          {connected && (
+            <span className="flex items-center gap-1 rounded-full bg-[oklch(0.92_0.06_150)] px-2 py-0.5 text-[11px] font-medium text-[oklch(0.42_0.11_152)]">
+              <CheckIcon className="size-2.5" aria-hidden />
+              Connected
+            </span>
+          )}
+        </div>
+        <p className="mt-0.5 text-xs text-muted-foreground">{blurb}</p>
+      </div>
       {!connected && (
-        <Button asChild size="sm" variant="outline" className="gap-2">
+        <Button asChild size="sm" variant="outline" className="shrink-0 gap-1.5">
           <a href={startUrl}>
             <Icon className="size-3.5" aria-hidden />
-            {buttonLabel}
+            Connect
           </a>
         </Button>
       )}
-    </SourceCard>
+    </div>
   );
 }
 
@@ -483,8 +493,8 @@ function ExtensionCard({ connected, onMark }: { connected: boolean; onMark: () =
   return (
     <SourceCard Icon={ChromeIcon} name="Chrome Extension" blurb="Capture LinkedIn mutual connections as you browse." connected={connected}>
       {!connected && (
-        <div className="flex flex-col gap-2.5">
-          <ol className="flex flex-col gap-1.5">
+        <div className="flex items-start gap-6">
+          <ol className="grid flex-1 grid-cols-2 gap-x-6 gap-y-1.5">
             {[
               "Download the Warmline extension and unzip it.",
               "Open chrome://extensions, enable Developer mode.",
@@ -497,7 +507,7 @@ function ExtensionCard({ connected, onMark }: { connected: boolean; onMark: () =
               </li>
             ))}
           </ol>
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             <Button asChild variant="outline" size="sm" className="gap-1.5">
               <a href="https://github.com/warmline/extension/releases/latest" target="_blank" rel="noopener noreferrer">
                 <DownloadIcon className="size-3.5" aria-hidden />
