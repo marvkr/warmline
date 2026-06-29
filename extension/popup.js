@@ -1,4 +1,4 @@
-const APP_URL = "http://localhost:3000";
+const APP_URL = "https://warmline-app.vercel.app";
 const SYNC_KEY = "warmline:autoSync";
 
 function initials(name) {
