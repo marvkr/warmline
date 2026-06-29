@@ -35,19 +35,36 @@ export default function Onboarding() {
   const [step, setStep] = useState(0);
   const [icpText, setIcpText] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [elapsed, setElapsed] = useState(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const elapsedTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastStepAt = useRef<number | null>(null);
 
-  useEffect(() => () => void (timer.current && clearInterval(timer.current)), []);
+  useEffect(() => () => {
+    if (timer.current) clearInterval(timer.current);
+    if (elapsedTimer.current) clearInterval(elapsedTimer.current);
+  }, []);
 
   async function run() {
     setRunning(true);
     setError(null);
     setStep(0);
-    // advance the visible steps while the action runs (each step really happens)
-    timer.current = setInterval(
-      () => setStep((s) => Math.min(s + 1, STEPS.length - 1)),
-      3500,
-    );
+    setElapsed(0);
+    lastStepAt.current = null;
+    timer.current = setInterval(() => {
+      setStep((s) => {
+        const next = Math.min(s + 1, STEPS.length - 1);
+        if (next === STEPS.length - 1 && s !== next) {
+          lastStepAt.current = Date.now();
+          setElapsed(0);
+          elapsedTimer.current = setInterval(
+            () => setElapsed((e) => e + 1),
+            1000,
+          );
+        }
+        return next;
+      });
+    }, 3500);
     try {
       const res = await generate({ website, linkedin, x });
       setIcpText(res.icpText);
@@ -58,6 +75,7 @@ export default function Onboarding() {
       setRunning(false);
     } finally {
       if (timer.current) clearInterval(timer.current);
+      if (elapsedTimer.current) clearInterval(elapsedTimer.current);
     }
   }
 
@@ -99,7 +117,13 @@ export default function Onboarding() {
                 status={statusOf(i)}
                 showConnector={i < STEPS.length - 1}
                 description={
-                  i === 1 && icpText && step > 1 ? icpText : undefined
+                  i === 1 && icpText && step > 1
+                    ? icpText
+                    : i === STEPS.length - 1 && step === STEPS.length - 1
+                      ? elapsed < 5
+                        ? "Scoring your network against your ICP…"
+                        : `Still working — embedding takes ~1–2 min (${elapsed}s)`
+                      : undefined
                 }
               />
             ))}
