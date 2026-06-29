@@ -147,7 +147,7 @@ export default function Onboarding() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
-      <div className="w-full max-w-md">
+      <div className={phase === "connect" ? "w-full max-w-2xl" : "w-full max-w-md"}>
         <div className="mb-8 flex items-center gap-2.5">
           <WarmlineMark className="size-7 shrink-0" />
           <span className="text-base font-semibold tracking-tight">Warmline</span>
@@ -268,7 +268,7 @@ function ConnectStep({
         The more contacts you add, the warmer your paths.
       </p>
 
-      <div className="mt-6 flex flex-col gap-2.5">
+      <div className="mt-6 grid grid-cols-3 gap-2.5">
         <OAuthCard
           Icon={GoogleIcon}
           name="Google"
