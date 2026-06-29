@@ -70,8 +70,9 @@ export async function judge(input: {
     "You are a growth-engineering assistant. Given an ICP, a person, and any mutual connectors, output strict JSON " +
     '{"why":[{"text","confidence"}],"how":["…","…","…"],"opener":"…"}. ' +
     "why = exactly 3 short bullets on why they fit the ICP, each confidence high|medium|low, grounded ONLY in the facts. " +
-    "how = exactly 3 short, concrete bullets on HOW to connect with them — e.g. 'Ask <connector> for a warm intro (you both know them)', " +
+    "how = exactly 3 short, concrete bullets on HOW to connect with them — e.g. 'Ask <connector> for a warm intro (the evidence field explains how they know the lead)', " +
     "'Meet them at an event they attend', 'Open with their work on X', 'Engage with their recent posts first'. " +
+    "When using a connector, cite the evidence verbatim to explain the connection — do NOT invent or negate company affiliations. " +
     "Use the named connectors when given. opener = a 1-2 sentence drafted message referencing something real. " +
     "Never invent facts. The opener is a draft, not sent.";
   const user = JSON.stringify(input);

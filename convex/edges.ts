@@ -71,7 +71,7 @@ export const linkLeadEdges = internalMutation({
         to: lead._id,
         type: "shared_company",
         confidence: 0.5,
-        evidence: `Both at ${lead.company}`,
+        evidence: `${lead.company} colleague`,
       });
       linked.push(c._id);
     }
