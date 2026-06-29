@@ -18,10 +18,20 @@ import {
   UploadIcon,
   DownloadIcon,
   FileTextIcon,
+  ExternalLinkIcon,
 } from "@/components/icons";
-import { ChromeIcon, LinkedinIcon } from "@/components/icons/brand";
+import {
+  ChromeIcon,
+  GoogleIcon,
+  InstagramIcon,
+  LinkedinIcon,
+  LumaIcon,
+  OutlookIcon,
+  XIcon,
+} from "@/components/icons/brand";
 import { cn } from "@/lib/utils";
 import { WarmlineMark } from "@/components/warmline-mark";
+import type { Provider } from "@/app/connectors/connectors-config";
 
 const PROCESSING_STEPS = [
   "Reading your product site",
@@ -30,6 +40,8 @@ const PROCESSING_STEPS = [
   "Finding warm paths",
   "Ranking & drafting openers",
 ];
+
+type ConnectedMap = Partial<Record<Provider, boolean>>;
 
 export default function Onboarding() {
   const router = useRouter();
@@ -40,11 +52,11 @@ export default function Onboarding() {
 
   const [phase, setPhase] = useState<"product" | "connect" | "processing">("product");
   const [website, setWebsite] = useState("");
-  const [linkedinConnected, setLinkedinConnected] = useState(false);
-  const [extensionConnected, setExtensionConnected] = useState(false);
-  const [uploadBusy, setUploadBusy] = useState(false);
+  const [linkedin, setLinkedin] = useState("");
+  const [x, setX] = useState("");
+  const [connected, setConnected] = useState<ConnectedMap>({});
+  const [uploadBusy, setUploadBusy] = useState<Partial<Record<Provider, boolean>>>({});
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [linkedinGuideOpen, setLinkedinGuideOpen] = useState(false);
 
   const [step, setStep] = useState(0);
   const [elapsed, setElapsed] = useState(0);
@@ -57,9 +69,13 @@ export default function Onboarding() {
     if (elapsedTimer.current) clearInterval(elapsedTimer.current);
   }, []);
 
-  async function handleLinkedInFile(file: File) {
+  function markConnected(provider: Provider) {
+    setConnected((c) => ({ ...c, [provider]: true }));
+  }
+
+  async function handleFileUpload(provider: Provider, file: File, parse?: boolean) {
     try {
-      setUploadBusy(true);
+      setUploadBusy((b) => ({ ...b, [provider]: true }));
       setUploadError(null);
       const url = await generateUploadUrl();
       const res = await fetch(url, {
@@ -70,28 +86,26 @@ export default function Onboarding() {
       if (!res.ok) throw new Error("Upload failed");
       const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
       await recordUpload({
-        provider: "linkedin",
+        provider,
         method: "manual",
-        label: "LinkedIn connections",
+        label: `${provider} data`,
         fileName: file.name,
         storageId,
       });
-      await parseLinkedIn({ storageId });
-      setLinkedinConnected(true);
+      if (parse && provider === "linkedin") {
+        await parseLinkedIn({ storageId });
+      }
+      markConnected(provider);
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : "Upload failed");
     } finally {
-      setUploadBusy(false);
+      setUploadBusy((b) => ({ ...b, [provider]: false }));
     }
   }
 
-  async function markExtensionInstalled() {
-    await recordUpload({
-      provider: "extension",
-      method: "extension",
-      label: "Chrome extension",
-    });
-    setExtensionConnected(true);
+  async function handleExtensionRecord() {
+    await recordUpload({ provider: "extension", method: "extension", label: "Chrome extension" });
+    markConnected("extension");
   }
 
   async function startProcessing() {
@@ -103,16 +117,17 @@ export default function Onboarding() {
         const next = Math.min(s + 1, PROCESSING_STEPS.length - 1);
         if (next === PROCESSING_STEPS.length - 1 && s !== next) {
           setElapsed(0);
-          elapsedTimer.current = setInterval(
-            () => setElapsed((e) => e + 1),
-            1000,
-          );
+          elapsedTimer.current = setInterval(() => setElapsed((e) => e + 1), 1000);
         }
         return next;
       });
     }, 3500);
     try {
-      await generate({ website: website || undefined });
+      await generate({
+        website: website || undefined,
+        linkedin: linkedin || undefined,
+        x: x || undefined,
+      });
       setStep(PROCESSING_STEPS.length);
       setTimeout(() => router.push("/"), 1400);
     } catch (e) {
@@ -133,7 +148,6 @@ export default function Onboarding() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="mb-8 flex items-center gap-2.5">
           <WarmlineMark className="size-7 shrink-0" />
           <span className="text-base font-semibold tracking-tight">Warmline</span>
@@ -142,21 +156,22 @@ export default function Onboarding() {
         {phase === "product" && (
           <ProductStep
             website={website}
+            linkedin={linkedin}
+            x={x}
             onWebsite={setWebsite}
+            onLinkedin={setLinkedin}
+            onX={setX}
             onNext={() => setPhase("connect")}
           />
         )}
 
         {phase === "connect" && (
           <ConnectStep
-            linkedinConnected={linkedinConnected}
-            extensionConnected={extensionConnected}
+            connected={connected}
             uploadBusy={uploadBusy}
             uploadError={uploadError}
-            linkedinGuideOpen={linkedinGuideOpen}
-            onToggleGuide={() => setLinkedinGuideOpen((o) => !o)}
-            onLinkedInFile={handleLinkedInFile}
-            onMarkExtension={markExtensionInstalled}
+            onFileUpload={handleFileUpload}
+            onExtensionRecord={handleExtensionRecord}
             onBuild={startProcessing}
             error={processError}
           />
@@ -164,9 +179,7 @@ export default function Onboarding() {
 
         {phase === "processing" && (
           <div className="rounded-xl border border-border bg-card p-5 [box-shadow:var(--shadow-s)]">
-            <p className="mb-4 text-sm font-medium text-foreground">
-              Building your warm network…
-            </p>
+            <p className="mb-4 text-sm font-medium text-foreground">Building your warm network…</p>
             <ThinkingSteps>
               {PROCESSING_STEPS.map((title, i) => (
                 <ThinkingStep
@@ -175,8 +188,7 @@ export default function Onboarding() {
                   status={stepStatus(i)}
                   showConnector={i < PROCESSING_STEPS.length - 1}
                   description={
-                    i === PROCESSING_STEPS.length - 1 &&
-                    step === PROCESSING_STEPS.length - 1
+                    i === PROCESSING_STEPS.length - 1 && step === PROCESSING_STEPS.length - 1
                       ? elapsed < 5
                         ? "Scoring your network against your ICP…"
                         : `Still working — embedding takes ~1–2 min (${elapsed}s)`
@@ -185,11 +197,9 @@ export default function Onboarding() {
                 />
               ))}
             </ThinkingSteps>
-            {step >= PROCESSING_STEPS.length ? (
-              <p className="mt-3 text-sm font-medium text-foreground">
-                Done — opening your feed…
-              </p>
-            ) : null}
+            {step >= PROCESSING_STEPS.length && (
+              <p className="mt-3 text-sm font-medium text-foreground">Done — opening your feed…</p>
+            )}
           </div>
         )}
       </div>
@@ -198,36 +208,24 @@ export default function Onboarding() {
 }
 
 function ProductStep({
-  website,
-  onWebsite,
-  onNext,
+  website, linkedin, x,
+  onWebsite, onLinkedin, onX, onNext,
 }: {
-  website: string;
-  onWebsite: (v: string) => void;
+  website: string; linkedin: string; x: string;
+  onWebsite: (v: string) => void; onLinkedin: (v: string) => void; onX: (v: string) => void;
   onNext: () => void;
 }) {
   return (
     <div>
       <h1 className="text-xl font-semibold tracking-tight">What do you sell?</h1>
       <p className="mt-1.5 text-sm text-muted-foreground">
-        We read your product site to learn who you&apos;re selling to.
+        We read your product to learn who you&apos;re selling to, then rank people you know against it.
       </p>
       <div className="mt-7 flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label>Product website</Label>
-          <Input
-            type="url"
-            placeholder="https://your-product.com"
-            value={website}
-            onChange={(e) => onWebsite(e.target.value)}
-            autoFocus
-          />
-        </div>
-        <Button
-          onClick={onNext}
-          disabled={!website.trim()}
-          className="mt-1"
-        >
+        <Field label="Product website" value={website} onChange={onWebsite} placeholder="https://your-product.com" type="url" autoFocus />
+        <Field label="Your LinkedIn" value={linkedin} onChange={onLinkedin} placeholder="https://linkedin.com/in/you" type="url" />
+        <Field label="Your X" value={x} onChange={onX} placeholder="https://x.com/you" type="url" />
+        <Button onClick={onNext} disabled={!website.trim()} className="mt-1">
           Continue
         </Button>
       </div>
@@ -235,30 +233,33 @@ function ProductStep({
   );
 }
 
-function ConnectStep({
-  linkedinConnected,
-  extensionConnected,
-  uploadBusy,
-  uploadError,
-  linkedinGuideOpen,
-  onToggleGuide,
-  onLinkedInFile,
-  onMarkExtension,
-  onBuild,
-  error,
+function Field({
+  label, value, onChange, placeholder, type = "text", autoFocus,
 }: {
-  linkedinConnected: boolean;
-  extensionConnected: boolean;
-  uploadBusy: boolean;
+  label: string; value: string; onChange: (v: string) => void;
+  placeholder?: string; type?: string; autoFocus?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label>{label}</Label>
+      <Input type={type} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} autoFocus={autoFocus} />
+    </div>
+  );
+}
+
+function ConnectStep({
+  connected, uploadBusy, uploadError,
+  onFileUpload, onExtensionRecord, onBuild, error,
+}: {
+  connected: ConnectedMap;
+  uploadBusy: Partial<Record<Provider, boolean>>;
   uploadError: string | null;
-  linkedinGuideOpen: boolean;
-  onToggleGuide: () => void;
-  onLinkedInFile: (f: File) => void;
-  onMarkExtension: () => void;
+  onFileUpload: (p: Provider, f: File, parse?: boolean) => void;
+  onExtensionRecord: () => void;
   onBuild: () => void;
   error: string | null;
 }) {
-  const connectedCount = [linkedinConnected, extensionConnected].filter(Boolean).length;
+  const connectedCount = Object.values(connected).filter(Boolean).length;
 
   return (
     <div>
@@ -267,124 +268,105 @@ function ConnectStep({
         The more contacts you add, the warmer your paths.
       </p>
 
-      <div className="mt-7 flex flex-col gap-3">
-        {/* LinkedIn */}
-        <SourceCard
+      <div className="mt-6 flex flex-col gap-2.5">
+        <OAuthCard
+          Icon={GoogleIcon}
+          name="Google"
+          blurb="Contacts, calendar, and email headers."
+
+          connected={!!connected.google}
+          startUrl="/api/connectors/google"
+          buttonLabel="Connect Google"
+        />
+
+        <FileCard
           Icon={LinkedinIcon}
           name="LinkedIn"
-          blurb="Import your connections from a LinkedIn data export."
-          connected={linkedinConnected}
-        >
-          {!linkedinConnected && (
-            <div className="flex flex-col gap-3 pt-1">
-              <button
-                type="button"
-                onClick={onToggleGuide}
-                aria-expanded={linkedinGuideOpen}
-                className="flex items-center gap-2 text-left text-sm text-muted-foreground hover:text-foreground"
-              >
-                <FileTextIcon className="size-4 shrink-0 text-primary" aria-hidden />
-                <span>How to export your LinkedIn data</span>
-              </button>
+          blurb="Import your connections export."
 
-              {linkedinGuideOpen && (
-                <div className="flex flex-col gap-3 rounded-lg border border-border bg-card/50 p-3">
-                  <ol className="flex flex-col gap-2">
-                    {[
-                      { text: "Go to LinkedIn → Settings → Data Privacy → Get a copy of your data", warn: undefined },
-                      { text: "Select Download larger data archive (top option).", warn: "The second option won't include your connections." },
-                      { text: "Click Request archive. LinkedIn emails it in ~10 minutes." },
-                    ].map((s, i) => (
-                      <li key={i} className="flex gap-2 text-xs text-secondary-foreground">
-                        <span className="flex size-4 shrink-0 items-center justify-center rounded bg-primary/15 text-[10px] font-semibold text-primary">
-                          {i + 1}
-                        </span>
-                        <span>
-                          {s.text}
-                          {s.warn && (
-                            <span className="mt-0.5 block text-[oklch(0.78_0.14_22)]">{s.warn}</span>
-                          )}
-                        </span>
-                      </li>
-                    ))}
-                  </ol>
-                  <Button asChild variant="outline" size="sm" className="gap-2">
-                    <a
-                      href="https://www.linkedin.com/mypreferences/d/download-my-data"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Open LinkedIn export
-                      <DownloadIcon className="size-3.5" aria-hidden />
-                    </a>
-                  </Button>
-                </div>
-              )}
+          connected={!!connected.linkedin}
+          busy={!!uploadBusy.linkedin}
+          accept=".zip,application/zip"
+          acceptLabel="ZIP file"
+          exportUrl="https://www.linkedin.com/mypreferences/d/download-my-data"
+          guide={[
+            { text: "Select Download larger data archive (top option).", warn: "Second option won't include connections." },
+            { text: "Click Request archive — LinkedIn emails it in ~10 min." },
+          ]}
+          onFile={(f) => onFileUpload("linkedin", f, true)}
+        />
 
-              <LinkedInDropzone busy={uploadBusy} onFile={onLinkedInFile} />
-              {uploadError && (
-                <p className="text-xs text-destructive-foreground">{uploadError}</p>
-              )}
-            </div>
-          )}
-        </SourceCard>
+        <FileCard
+          Icon={XIcon}
+          name="Twitter / X"
+          blurb="Import your followers archive."
 
-        {/* Chrome Extension */}
-        <SourceCard
-          Icon={ChromeIcon}
-          name="Chrome Extension"
-          blurb="Capture LinkedIn mutual connections as you browse."
-          connected={extensionConnected}
-        >
-          {!extensionConnected && (
-            <div className="flex flex-col gap-3 pt-1">
-              <ol className="flex flex-col gap-2">
-                {[
-                  "Download the Warmline extension and unzip it.",
-                  "Open chrome://extensions, enable Developer mode.",
-                  "Click Load unpacked and select the folder.",
-                  "Open a lead's LinkedIn profile to capture mutuals.",
-                ].map((text, i) => (
-                  <li key={i} className="flex gap-2 text-xs text-secondary-foreground">
-                    <span className="flex size-4 shrink-0 items-center justify-center rounded bg-primary/15 text-[10px] font-semibold text-primary">
-                      {i + 1}
-                    </span>
-                    {text}
-                  </li>
-                ))}
-              </ol>
-              <div className="flex gap-2">
-                <Button asChild variant="outline" size="sm" className="gap-1.5">
-                  <a
-                    href="https://github.com/warmline/extension/releases/latest"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <DownloadIcon className="size-3.5" aria-hidden />
-                    Download
-                  </a>
-                </Button>
-                <Button size="sm" variant="ghost" className="gap-1.5" onClick={onMarkExtension}>
-                  <CheckIcon className="size-3.5" aria-hidden />
-                  Mark installed
-                </Button>
-              </div>
-            </div>
-          )}
-        </SourceCard>
+          connected={!!connected.twitter}
+          busy={!!uploadBusy.twitter}
+          accept=".zip,application/zip"
+          acceptLabel="ZIP file"
+          exportUrl="https://x.com/settings/download_your_data"
+          guide={[{ text: "Request your archive on the next screen." }]}
+          onFile={(f) => onFileUpload("twitter", f)}
+        />
+
+        <FileCard
+          Icon={LumaIcon}
+          name="Luma"
+          blurb="Add guests from events you host."
+
+          connected={!!connected.luma}
+          busy={!!uploadBusy.luma}
+          accept=".csv,text/csv"
+          acceptLabel="CSV file"
+          exportUrl="https://lu.ma/home"
+          guide={[
+            { text: "Open an event you host → Guests tab." },
+            { text: "Click Export and download as CSV." },
+          ]}
+          onFile={(f) => onFileUpload("luma", f)}
+        />
+
+        <FileCard
+          Icon={InstagramIcon}
+          name="Instagram"
+          blurb="Add your mutual followers."
+
+          connected={!!connected.instagram}
+          busy={!!uploadBusy.instagram}
+          accept=".zip,.json,.html,application/zip,application/json,text/html"
+          acceptLabel="ZIP, JSON, or HTML"
+          exportUrl="https://accountscenter.instagram.com/info_and_permissions/dyi/"
+          guide={[
+            { text: "Request a download → Connections → JSON or HTML." },
+          ]}
+          onFile={(f) => onFileUpload("instagram", f)}
+        />
+
+        <OAuthCard
+          Icon={OutlookIcon}
+          name="Outlook"
+          blurb="Contacts from recent email activity."
+
+          connected={!!connected.outlook}
+          startUrl="/api/connectors/outlook"
+          buttonLabel="Connect Outlook"
+        />
+
+        <ExtensionCard
+          connected={!!connected.extension}
+          onMark={onExtensionRecord}
+        />
       </div>
 
-      {error && (
-        <p className="mt-4 text-sm text-destructive-foreground">{error}</p>
-      )}
+      {uploadError && <p className="mt-3 text-xs text-destructive-foreground">{uploadError}</p>}
+      {error && <p className="mt-3 text-sm text-destructive-foreground">{error}</p>}
 
       <div className="mt-6 flex flex-col gap-2">
-        <Button onClick={onBuild} className="w-full">
-          {connectedCount > 0 ? "Build my network" : "Build my network"}
-        </Button>
+        <Button onClick={onBuild} className="w-full">Build my network</Button>
         {connectedCount === 0 && (
           <p className="text-center text-xs text-muted-foreground">
-            No sources connected yet — you can always add them later in Settings.
+            No sources yet — you can connect them later in Settings.
           </p>
         )}
       </div>
@@ -393,25 +375,17 @@ function ConnectStep({
 }
 
 function SourceCard({
-  Icon,
-  name,
-  blurb,
-  connected,
-  children,
+  Icon, name, blurb, connected, children,
 }: {
   Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  name: string;
-  blurb: string;
-  connected: boolean;
+  name: string; blurb: string; connected: boolean;
   children?: React.ReactNode;
 }) {
   return (
-    <div
-      className={cn(
-        "rounded-xl border bg-card p-4 [box-shadow:var(--shadow-s)]",
-        connected ? "border-[oklch(0.42_0.11_152/0.4)]" : "border-border",
-      )}
-    >
+    <div className={cn(
+      "rounded-xl border bg-card p-4 [box-shadow:var(--shadow-s)]",
+      connected ? "border-[oklch(0.42_0.11_152/0.4)]" : "border-border",
+    )}>
       <div className="flex items-start gap-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg [background-image:var(--velour-raised)] [box-shadow:var(--shadow-button)]">
           <Icon className="size-4.5" aria-hidden />
@@ -434,43 +408,136 @@ function SourceCard({
   );
 }
 
-function LinkedInDropzone({
-  busy,
-  onFile,
+function OAuthCard({
+  Icon, name, blurb, connected, startUrl, buttonLabel,
 }: {
-  busy: boolean;
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  name: string; blurb: string;
+  connected: boolean; startUrl: string; buttonLabel: string;
+}) {
+  return (
+    <SourceCard Icon={Icon} name={name} blurb={blurb} connected={connected}>
+      {!connected && (
+        <Button asChild size="sm" variant="outline" className="gap-2">
+          <a href={startUrl}>
+            <Icon className="size-3.5" aria-hidden />
+            {buttonLabel}
+          </a>
+        </Button>
+      )}
+    </SourceCard>
+  );
+}
+
+function FileCard({
+  Icon, name, blurb, connected, busy, accept, acceptLabel,
+  exportUrl, guide, onFile,
+}: {
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  name: string; blurb: string;
+  connected: boolean; busy: boolean;
+  accept: string; acceptLabel: string;
+  exportUrl: string;
+  guide: { text: string; warn?: string }[];
   onFile: (f: File) => void;
 }) {
+  const [guideOpen, setGuideOpen] = useState(false);
+
+  return (
+    <SourceCard Icon={Icon} name={name} blurb={blurb} connected={connected}>
+      {!connected && (
+        <div className="flex flex-col gap-2.5">
+          <button
+            type="button"
+            onClick={() => setGuideOpen((o) => !o)}
+            className="flex items-center gap-1.5 text-left text-xs text-muted-foreground hover:text-foreground"
+          >
+            <FileTextIcon className="size-3.5 shrink-0 text-primary" aria-hidden />
+            How to export your data
+          </button>
+          {guideOpen && (
+            <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-card/50 p-3">
+              <ol className="flex flex-col gap-1.5">
+                {guide.map((s, i) => (
+                  <li key={i} className="flex gap-2 text-xs text-secondary-foreground">
+                    <span className="flex size-4 shrink-0 items-center justify-center rounded bg-primary/15 text-[10px] font-semibold text-primary">{i + 1}</span>
+                    <span>{s.text}{s.warn && <span className="mt-0.5 block text-[oklch(0.78_0.14_22)]">{s.warn}</span>}</span>
+                  </li>
+                ))}
+              </ol>
+              <Button asChild variant="outline" size="sm" className="gap-1.5">
+                <a href={exportUrl} target="_blank" rel="noopener noreferrer">
+                  Open {name} export <ExternalLinkIcon className="size-3" aria-hidden />
+                </a>
+              </Button>
+            </div>
+          )}
+          <Dropzone accept={accept} acceptLabel={acceptLabel} busy={busy} onFile={onFile} />
+        </div>
+      )}
+    </SourceCard>
+  );
+}
+
+function ExtensionCard({ connected, onMark }: { connected: boolean; onMark: () => void }) {
+  return (
+    <SourceCard Icon={ChromeIcon} name="Chrome Extension" blurb="Capture LinkedIn mutual connections as you browse." connected={connected}>
+      {!connected && (
+        <div className="flex flex-col gap-2.5">
+          <ol className="flex flex-col gap-1.5">
+            {[
+              "Download the Warmline extension and unzip it.",
+              "Open chrome://extensions, enable Developer mode.",
+              "Click Load unpacked and select the folder.",
+              "Open a lead's LinkedIn profile to capture mutuals.",
+            ].map((text, i) => (
+              <li key={i} className="flex gap-2 text-xs text-secondary-foreground">
+                <span className="flex size-4 shrink-0 items-center justify-center rounded bg-primary/15 text-[10px] font-semibold text-primary">{i + 1}</span>
+                {text}
+              </li>
+            ))}
+          </ol>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm" className="gap-1.5">
+              <a href="https://github.com/warmline/extension/releases/latest" target="_blank" rel="noopener noreferrer">
+                <DownloadIcon className="size-3.5" aria-hidden />
+                Download
+              </a>
+            </Button>
+            <Button size="sm" variant="ghost" className="gap-1.5" onClick={onMark}>
+              <CheckIcon className="size-3.5" aria-hidden />
+              Mark installed
+            </Button>
+          </div>
+        </div>
+      )}
+    </SourceCard>
+  );
+}
+
+function Dropzone({
+  accept, acceptLabel, busy, onFile,
+}: {
+  accept: string; acceptLabel: string; busy: boolean; onFile: (f: File) => void;
+}) {
   const [dragging, setDragging] = useState(false);
-
-  function handle(files: FileList | null) {
-    const file = files?.[0];
-    if (file) onFile(file);
-  }
-
+  function handle(files: FileList | null) { const f = files?.[0]; if (f) onFile(f); }
   return (
     <label
       onDragOver={(e) => { e.preventDefault(); if (!busy) setDragging(true); }}
       onDragLeave={() => setDragging(false)}
       onDrop={(e) => { e.preventDefault(); setDragging(false); if (!busy) handle(e.dataTransfer.files); }}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-5 text-center transition-colors",
-        dragging ? "border-ring/60 bg-primary/5" : "border-border hover:border-ring/30 bg-input",
+        "flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed p-4 text-center transition-colors [box-shadow:var(--shadow-inset)]",
+        dragging ? "border-ring/60 bg-primary/5" : "border-border bg-input hover:border-ring/30",
         busy && "pointer-events-none opacity-60",
-        "[box-shadow:var(--shadow-inset)]",
       )}
     >
       <UploadIcon className="size-4 text-muted-foreground" aria-hidden />
       <span className="text-xs font-medium text-foreground/85">
-        {busy ? "Importing connections…" : "Drop your LinkedIn ZIP here or click to browse"}
+        {busy ? "Importing…" : `Drop ${acceptLabel} here or click to browse`}
       </span>
-      <input
-        type="file"
-        accept=".zip,application/zip"
-        disabled={busy}
-        className="hidden"
-        onChange={(e) => handle(e.target.files)}
-      />
+      <input type="file" accept={accept} disabled={busy} className="hidden" onChange={(e) => handle(e.target.files)} />
     </label>
   );
 }
