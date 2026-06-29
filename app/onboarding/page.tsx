@@ -6,6 +6,13 @@ import { useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -276,6 +283,22 @@ function ConnectStep({
           />
         </div>
 
+        <OAuthCard
+          Icon={GoogleIcon}
+          name="Google"
+          blurb="Contacts, calendar, and email headers."
+          connected={!!connected.google}
+          startUrl="/api/connectors/google"
+        />
+
+        <OAuthCard
+          Icon={OutlookIcon}
+          name="Outlook"
+          blurb="Contacts from recent email activity."
+          connected={!!connected.outlook}
+          startUrl="/api/connectors/outlook"
+        />
+
         <FileCard
           Icon={LinkedinIcon}
           name="LinkedIn"
@@ -290,14 +313,6 @@ function ConnectStep({
             { text: "Click Request archive — LinkedIn emails it in ~10 min." },
           ]}
           onFile={(f) => onFileUpload("linkedin", f, true)}
-        />
-
-        <OAuthCard
-          Icon={GoogleIcon}
-          name="Google"
-          blurb="Contacts, calendar, and email headers."
-          connected={!!connected.google}
-          startUrl="/api/connectors/google"
         />
 
         <FileCard
@@ -340,14 +355,6 @@ function ConnectStep({
           exportUrl="https://accountscenter.instagram.com/info_and_permissions/dyi/"
           guide={[{ text: "Request a download → Connections → JSON or HTML." }]}
           onFile={(f) => onFileUpload("instagram", f)}
-        />
-
-        <OAuthCard
-          Icon={OutlookIcon}
-          name="Outlook"
-          blurb="Contacts from recent email activity."
-          connected={!!connected.outlook}
-          startUrl="/api/connectors/outlook"
         />
       </div>
 
@@ -451,37 +458,39 @@ function FileCard({
   guide: { text: string; warn?: string }[];
   onFile: (f: File) => void;
 }) {
-  const [guideOpen, setGuideOpen] = useState(false);
-
   return (
     <SourceCard Icon={Icon} name={name} blurb={blurb} connected={connected}>
       {!connected && (
         <div className="flex flex-col gap-2.5">
-          <button
-            type="button"
-            onClick={() => setGuideOpen((o) => !o)}
-            className="flex items-center gap-1.5 text-left text-xs text-muted-foreground hover:text-foreground"
-          >
-            <FileTextIcon className="size-3.5 shrink-0 text-primary" aria-hidden />
-            How to export your data
-          </button>
-          {guideOpen && (
-            <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-card/50 p-3">
-              <ol className="flex flex-col gap-1.5">
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                type="button"
+                className="flex cursor-pointer items-center gap-1.5 text-left text-xs font-medium text-primary/70 hover:text-primary"
+              >
+                <FileTextIcon className="size-3.5 shrink-0 text-primary" aria-hidden />
+                How to export your data
+              </button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Export from {name}</DialogTitle>
+              </DialogHeader>
+              <ol className="flex flex-col gap-3 pt-1">
                 {guide.map((s, i) => (
-                  <li key={i} className="flex gap-2 text-xs text-secondary-foreground">
-                    <span className="flex size-4 shrink-0 items-center justify-center rounded bg-primary/15 text-[10px] font-semibold text-primary">{i + 1}</span>
-                    <span>{s.text}{s.warn && <span className="mt-0.5 block text-[oklch(0.78_0.14_22)]">{s.warn}</span>}</span>
+                  <li key={i} className="flex gap-3 text-sm text-secondary-foreground">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded bg-primary/15 text-[11px] font-semibold text-primary">{i + 1}</span>
+                    <span>{s.text}{s.warn && <span className="mt-1 block text-[oklch(0.78_0.14_22)] text-xs">{s.warn}</span>}</span>
                   </li>
                 ))}
               </ol>
-              <Button asChild variant="outline" size="sm" className="gap-1.5">
+              <Button asChild variant="outline" className="mt-2 gap-1.5">
                 <a href={exportUrl} target="_blank" rel="noopener noreferrer">
-                  Open {name} export <ExternalLinkIcon className="size-3" aria-hidden />
+                  Open {name} export <ExternalLinkIcon className="size-3.5" aria-hidden />
                 </a>
               </Button>
-            </div>
-          )}
+            </DialogContent>
+          </Dialog>
           <Dropzone accept={accept} acceptLabel={acceptLabel} busy={busy} onFile={onFile} />
         </div>
       )}
@@ -493,8 +502,8 @@ function ExtensionCard({ connected, onMark }: { connected: boolean; onMark: () =
   return (
     <SourceCard Icon={ChromeIcon} name="Chrome Extension" blurb="Capture LinkedIn mutual connections as you browse." connected={connected}>
       {!connected && (
-        <div className="flex items-start gap-6">
-          <ol className="grid flex-1 grid-cols-2 gap-x-6 gap-y-1.5">
+        <div className="flex flex-col gap-3">
+          <ol className="grid grid-cols-2 gap-x-6 gap-y-1.5">
             {[
               "Download the Warmline extension and unzip it.",
               "Open chrome://extensions, enable Developer mode.",
@@ -507,7 +516,7 @@ function ExtensionCard({ connected, onMark }: { connected: boolean; onMark: () =
               </li>
             ))}
           </ol>
-          <div className="flex shrink-0 gap-2">
+          <div className="flex gap-2">
             <Button asChild variant="outline" size="sm" className="gap-1.5">
               <a href="https://github.com/warmline/extension/releases/latest" target="_blank" rel="noopener noreferrer">
                 <DownloadIcon className="size-3.5" aria-hidden />
