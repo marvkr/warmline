@@ -96,11 +96,36 @@ type Pre = {
 };
 
 function heuristicHow(p: Doc<"persons">): string[] {
-  if (p.role === "connector")
-    return ["Connect with them to unlock leads in your ICP"];
   if (p.relationshipToYou === "connected")
     return ["Reach out directly via LinkedIn or email"];
   return ["Ask a mutual connection for a warm intro"];
+}
+
+async function connectorHow(
+  ctx: QueryCtx,
+  p: Doc<"persons">,
+): Promise<string[]> {
+  const first = p.name.split(" ")[0];
+  const edges = await ctx.db
+    .query("edges")
+    .withIndex("by_from", (q) => q.eq("from", p._id))
+    .take(5);
+  const targets: string[] = [];
+  for (const e of edges) {
+    const lead = await ctx.db.get(e.to);
+    if (lead) targets.push(lead.name.split(" ")[0]);
+  }
+  if (targets.length > 0) {
+    return [
+      `Ask ${first} for a warm intro to ${targets.slice(0, 2).join(" or ")}`,
+      `Mention your ICP when you reconnect so they can think of others`,
+    ];
+  }
+  const domain = p.company ? `in ${p.company}'s network` : "in their network";
+  return [
+    `Reconnect with ${first} and share who you're trying to reach`,
+    `Ask if they know any founders or PMs ${domain} who fit your ICP`,
+  ];
 }
 
 export const list = query({
@@ -158,7 +183,7 @@ export const list = query({
       .slice(0, Math.max(5, Math.floor(limit / 3)));
     for (const c of topConnectors) {
       const h = heuristicRow(c);
-      pre.push({ p: c, score: h.score, why: h.why, how: heuristicHow(c) });
+      pre.push({ p: c, score: h.score, why: h.why, how: await connectorHow(ctx, c) });
     }
 
     // Sort, slice, and compute mutuals ONLY for the returned rows (bounds reads).
