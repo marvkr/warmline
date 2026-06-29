@@ -26,6 +26,31 @@ Built for the **YC AI Growth Hackathon** (24-hour build).
 - **Why + How** — every lead ships with the reasoning and a drafted opener. Draft only — never auto-sent.
 - **CSV export** — every CRM imports one, so one file replaces ten fragile integrations.
 
+## How Convex powers Warmline
+
+Convex isn't just a database here — it's the entire backend runtime. Every piece of server-side logic runs as a Convex function.
+
+**Schema + typed queries**
+The graph lives in Convex tables (`persons`, `edges`, `recommendations`, `icp`, `feedback`, `personVectors`) with explicit indexes (`by_role`, `by_from`, `by_to`, `by_icp_and_score`, etc.). All queries and mutations use the generated TypeScript bindings — no raw SQL, no ORMs, no drift between schema and types.
+
+**Realtime subscriptions**
+The feed (`api.feed.list`) is a Convex `query`. The React client subscribes via `useQuery` — when the daily cron re-ranks or the user thumbs up a row, the UI updates live with no polling or websocket plumbing.
+
+**Actions for long-running work**
+CPU-heavy work — scraping the product site (Firecrawl), deriving the ICP (OpenAI), embedding 120+ people (`text-embedding-3-small`), calling the Fiber people API — runs in Convex `action`s which have no 10 s timeout and can call external APIs directly from within the Convex runtime.
+
+**Scheduled cron**
+`convex/crons.ts` registers a daily job at 13:00 UTC that recomputes the bridge graph (`edges.computeEdges`) and re-ranks leads against the latest ICP (`rank.rebuild`). The entire pipeline — graph traversal → vector similarity → LLM judge → upsert recommendations — runs server-side on schedule with no external orchestrator.
+
+**Vector index for goal-fit ranking**
+`personVectors` has a `vectorIndex("by_embedding", { vectorField: "embedding", dimensions: 1536 })`. The ranker embeds the ICP text, runs a vector search across all person embeddings, then fuses cosine similarity with warm-reachability to produce the final score.
+
+**File storage**
+User-uploaded exports (LinkedIn ZIP, Twitter ZIP, Luma CSV, Instagram) are stored in Convex file storage. `connectors.generateUploadUrl` returns a signed PUT URL; the client uploads directly; `connectors.recordUpload` persists the `storageId` reference and triggers parsing.
+
+**Auth**
+`@convex-dev/auth` handles password-based sign-in with session tokens stored in Convex's own auth tables — no third-party auth service needed.
+
 ## Tech stack
 
 - [Convex](https://convex.dev/) — backend, realtime, and cron / scheduled functions
