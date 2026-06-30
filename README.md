@@ -58,6 +58,7 @@ User-uploaded exports (LinkedIn ZIP, Twitter ZIP, Luma CSV, Instagram) are store
 - [OpenAI](https://openai.com/) — LLM reasoning + embeddings for ranking
 - [Next.js](https://nextjs.org/) + [React](https://react.dev/) — frontend
 - [Tailwind](https://tailwindcss.com/) — UI
+- [Better Design](https://better-design.com/) — design system and UI/UX
 - [Convex Auth](https://labs.convex.dev/auth) — authentication
 
 ## Get started
