@@ -10,6 +10,8 @@ Tell Warmline your goal once. A proactive agent watches the connections you alre
 
 Built for the **YC AI Growth Hackathon** (24-hour build).
 
+![Warmline feed — ranked list of who to reach out to, with why and how](public/feed-screenshot.png)
+
 ## What makes it different (not just another network search)
 
 - **Proactive, not reactive** — it *pushes* the intro you didn't ask for, instead of waiting for you to search.
